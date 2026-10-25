@@ -10,7 +10,7 @@ from homeassistant.components import zeroconf
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import CONF_HOST, Platform
 from homeassistant.core import HomeAssistant
-from homeassistant.exceptions import ConfigEntryNotReady
+from homeassistant.exceptions import ConfigEntryAuthFailed, ConfigEntryNotReady
 from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers.httpx_client import get_async_client
@@ -24,6 +24,7 @@ from .const import (
     CONF_SELECTED_ZONE,
     DOMAIN,
 )
+from .core.bridge import AuthError, BridgeError
 from .core.config import Settings
 from .core.engine import HueSyncEngine
 from .core.scenes import Scene, load_scene, load_scene_dir
@@ -111,6 +112,16 @@ async def async_setup_entry(
         raise ConfigEntryNotReady(
             engine.last_error or f"Bridge at {settings.bridge_host} is not reachable"
         )
+    # TODO: start reauth when the key is rejected while running, not only at setup
+    try:
+        # bridge info needs no key; this proves the key still works
+        await engine.list_zones()
+    except AuthError as err:
+        await engine.shutdown()
+        raise ConfigEntryAuthFailed(str(err)) from err
+    except BridgeError as err:
+        await engine.shutdown()
+        raise ConfigEntryNotReady(str(err)) from err
 
     info = engine.bridge_info
     dr.async_get(hass).async_get_or_create(

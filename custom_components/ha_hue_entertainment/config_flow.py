@@ -125,20 +125,75 @@ class HueEntertainmentConfigFlow(ConfigFlow, domain=DOMAIN):
         self._host, self._name = host, info.get("name") or "Hue bridge"
         return await self.async_step_link()
 
+    async def async_step_reauth(self, entry_data: dict[str, Any]) -> ConfigFlowResult:
+        """The bridge rejected our key: pair again with the link button."""
+        entry = self._get_reauth_entry()
+        self._host, self._name = entry.data[CONF_HOST], entry.title
+        return await self.async_step_reauth_confirm()
+
+    async def async_step_reauth_confirm(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        errors: dict[str, str] = {}
+        if user_input is not None:
+            keys = await self._async_pair(errors)
+            if keys:
+                return self.async_update_reload_and_abort(
+                    self._get_reauth_entry(),
+                    data_updates={CONF_APP_KEY: keys[0], CONF_CLIENT_KEY: keys[1]},
+                )
+        return self.async_show_form(
+            step_id="reauth_confirm",
+            description_placeholders={"name": self._name, "host": self._host},
+            errors=errors,
+        )
+
+    async def async_step_reconfigure(
+        self, user_input: dict[str, Any] | None = None
+    ) -> ConfigFlowResult:
+        """Change the bridge address by hand. The bridge must be the same one."""
+        entry = self._get_reconfigure_entry()
+        errors: dict[str, str] = {}
+        if user_input is not None:
+            host = user_input[CONF_HOST].strip()
+            try:
+                info = await self._bridge(host).info()
+            except (httpx.HTTPError, ValueError, KeyError):
+                errors["base"] = "cannot_connect"
+            else:
+                await self.async_set_unique_id(info["bridgeid"].upper())
+                self._abort_if_unique_id_mismatch(reason="wrong_bridge")
+                return self.async_update_reload_and_abort(
+                    entry, data_updates={CONF_HOST: host}
+                )
+        return self.async_show_form(
+            step_id="reconfigure",
+            data_schema=vol.Schema(
+                {vol.Required(CONF_HOST, default=entry.data[CONF_HOST]): str}
+            ),
+            errors=errors,
+        )
+
+    async def _async_pair(self, errors: dict[str, str]) -> tuple[str, str] | None:
+        """Pair with the bridge at self._host; fill `errors` on failure."""
+        try:
+            return await self._bridge(self._host).pair(APP_NAME)
+        except LinkButtonNotPressed:
+            errors["base"] = "link_button_not_pressed"
+        except (BridgeError, httpx.HTTPError) as err:
+            _LOGGER.warning("Pairing with %s failed: %s", self._host, err)
+            errors["base"] = "cannot_connect"
+        return None
+
     async def async_step_link(
         self, user_input: dict[str, Any] | None = None
     ) -> ConfigFlowResult:
         """Wait for the user to press the link button, then pair."""
         errors: dict[str, str] = {}
         if user_input is not None:
-            try:
-                app_key, client_key = await self._bridge(self._host).pair(APP_NAME)
-            except LinkButtonNotPressed:
-                errors["base"] = "link_button_not_pressed"
-            except (BridgeError, httpx.HTTPError) as err:
-                _LOGGER.warning("Pairing with %s failed: %s", self._host, err)
-                errors["base"] = "cannot_connect"
-            else:
+            keys = await self._async_pair(errors)
+            if keys:
+                app_key, client_key = keys
                 return self.async_create_entry(
                     title=self._name,
                     data={

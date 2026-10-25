@@ -19,6 +19,17 @@
       "link": {
         "title": "Press the link button",
         "description": "Press the round link button on top of **{name}** ({host}), then select **Submit** within 30 seconds."
+      },
+      "reauth_confirm": {
+        "title": "Pair again",
+        "description": "**{name}** ({host}) no longer accepts this integration's key, for example after a bridge reset. Press the round link button on the bridge, then select **Submit** within 30 seconds."
+      },
+      "reconfigure": {
+        "title": "Change the bridge address",
+        "description": "Enter the new IP address or hostname of this bridge.",
+        "data": {
+          "host": "Host"
+        }
       }
     },
     "error": {
@@ -28,7 +39,10 @@
     "abort": {
       "already_configured": "This bridge is already set up.",
       "cannot_connect": "Could not reach the bridge.",
-      "not_hue_bridge": "This device is not a Hue bridge."
+      "not_hue_bridge": "This device is not a Hue bridge.",
+      "reauth_successful": "Paired again.",
+      "reconfigure_successful": "The bridge address was updated.",
+      "wrong_bridge": "That address belongs to a different Hue bridge."
     }
   },
   "entity": {
