@@ -27,10 +27,11 @@ import voluptuous as vol
 
 from .const import DOMAIN
 from .core.bridge import BridgeError
-from .core.engine import HueSyncEngine
-from .core.scenes import SceneError
+from .core.engine import HueSyncEngine, to_hex
+from .core.scenes import SceneError, SceneRun, load_scene
 
 COLOR_PUSH_INTERVAL = timedelta(seconds=0.05)
+PREVIEW_INTERVAL = timedelta(seconds=0.05)
 ENTRY = {vol.Optional("entry_id"): str}
 COLOR = vol.Any(str, [vol.Coerce(float)])
 
@@ -52,6 +53,7 @@ def async_register(hass: HomeAssistant) -> None:
         ws_speed,
         ws_set_colors,
         ws_subscribe,
+        ws_scene_preview,
         ws_live_claim,
         ws_live_frame,
         ws_live_release,
@@ -355,6 +357,44 @@ def ws_subscribe(hass: HomeAssistant, connection, msg: dict) -> None:
     send_status()
     if msg["colors"]:
         send_colors()
+
+
+@websocket_api.websocket_command(
+    {
+        vol.Required("type"): f"{DOMAIN}/scene/preview",
+        vol.Required("scene"): dict,
+        vol.Optional("params"): dict,
+        vol.Required("positions"): [vol.ExactSequence([vol.Coerce(float)] * 3)],
+    }
+)
+@callback
+def ws_scene_preview(hass: HomeAssistant, connection, msg: dict) -> None:
+    positions = {i: tuple(p) for i, p in enumerate(msg["positions"])}
+    try:
+        scene = load_scene(msg["scene"], source="Scene preview")
+        run = SceneRun(scene, positions, msg.get("params"))
+    except (SceneError, ValueError) as err:
+        connection.send_error(msg["id"], "invalid_scene", str(err))
+        return
+
+    @callback
+    def send_frame(_now=None) -> None:
+        nonlocal run
+        frame = run.render(PREVIEW_INTERVAL.total_seconds())
+        if frame is None:
+            run = SceneRun(scene, positions, msg.get("params"))
+            return
+        connection.send_message(
+            websocket_api.event_message(
+                msg["id"], {"colors": [to_hex(frame[i]) for i in positions]}
+            )
+        )
+
+    connection.subscriptions[msg["id"]] = async_track_time_interval(
+        hass, send_frame, PREVIEW_INTERVAL
+    )
+    connection.send_result(msg["id"])
+    send_frame()
 
 
 @websocket_api.websocket_command(
