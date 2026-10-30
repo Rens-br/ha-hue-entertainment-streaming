@@ -311,6 +311,7 @@ class HueEntertainmentPanel extends LitElement {
     return html`
       <hue-scene-panel
         .scenes=${this.scenes}
+        .getScene=${(id: string) => this.call<Record<string, unknown>>("scene", { scene: id })}
         .playing=${s.scene.id}
         .playingParams=${s.scene.params}
         .speed=${s.scene.speed}

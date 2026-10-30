@@ -895,7 +895,7 @@ customElements.define("hue-room-preview", Oe);
 //#region src/scenes.ts
 var ke = class extends q {
 	constructor(...e) {
-		super(...e), this.scenes = [], this.playing = null, this.playingParams = null, this.speed = 1, this.disabled = !1, this.drafts = {};
+		super(...e), this.scenes = [], this.playing = null, this.playingParams = null, this.speed = 1, this.disabled = !1, this.drafts = {}, this.sceneJson = "";
 	}
 	static {
 		this.properties = {
@@ -904,9 +904,11 @@ var ke = class extends q {
 			playingParams: { attribute: !1 },
 			speed: { type: Number },
 			disabled: { type: Boolean },
+			getScene: { attribute: !1 },
 			selected: { state: !0 },
 			drafts: { state: !0 },
-			speedDraft: { state: !0 }
+			speedDraft: { state: !0 },
+			sceneJson: { state: !0 }
 		};
 	}
 	get current() {
@@ -948,6 +950,30 @@ var ke = class extends q {
 	uploadScene() {
 		(this.shadowRoot?.getElementById("scene-upload"))?.click();
 	}
+	get dialog() {
+		return this.shadowRoot?.querySelector("dialog");
+	}
+	async openDialog(e) {
+		this.dialog?.showModal(), this.sceneJson = "", this.sceneJson = JSON.stringify(await this.getScene?.(e.id), null, 2), this.drawPreviewGrid();
+	}
+	closeDialog() {
+		this.dialog?.close();
+	}
+	get previewCanvas() {
+		return this.shadowRoot?.getElementById("scene-preview");
+	}
+	drawPreviewGrid() {
+		let e = this.previewCanvas;
+		if (!e) return;
+		let t = e.getContext("2d");
+		if (!t) return;
+		let n = Math.min((e.width - 16) / (25.98 + .6), (e.height - 16) / 25.6), r = e.width / 2, i = e.height / 2;
+		for (let e = 0; e < 16; e++) for (let a = 0; a < 11; a++) for (let o = 0; o < 16; o++) {
+			if (e && a && o) continue;
+			let s = r + (e - o) * n * .866, c = i + ((e + o - 15) * .5 - a + 5) * n, l = Math.floor((a === 0 ? 1 : e === 0 ? .8 : .6) * 255);
+			t.fillStyle = `rgb(${l}, ${l}, ${l})`, t.beginPath(), t.arc(s, c, n * .3, 0, Math.PI * 2), t.fill();
+		}
+	}
 	handleUpload(e) {
 		let t = e.target;
 		if (!t.files?.length) return;
@@ -967,6 +993,39 @@ var ke = class extends q {
       <div class="grid">
         ${this.renderList()} ${e ? this.renderForm(e) : R}
       </div>
+      ${this.renderDialog(e)}
+    `;
+	}
+	renderDialog(e) {
+		return F`
+      <dialog
+        @click=${(e) => {
+			e.target === e.currentTarget && this.closeDialog();
+		}}
+      >
+        <div class="dialog-header">
+          <span class="value">${e?.name ?? ""}</span>
+          <ha-icon-button .label=${"Close"} @click=${() => this.closeDialog()}>
+            <ha-icon icon="mdi:close"></ha-icon>
+          </ha-icon-button>
+        </div>
+        <div class="dialog-content">
+          <div>${e?.description ?? ""}</div>
+          <div class="dialog-panes">
+            <div class="dialog-square">
+              ${customElements.get("ha-code-editor") ? F`<ha-code-editor mode="yaml" .value=${this.sceneJson}></ha-code-editor>` : F`<textarea .value=${this.sceneJson}></textarea>`}
+            </div>
+            <div class="preview-square">
+            <canvas id="scene-preview" width="440" height="440"></canvas>
+            </div>
+          </div>
+        </div>
+        <div class="row actions dialog-footer">
+          <ha-button size="s" appearance="plain" @click=${() => this.closeDialog()}>
+            Close
+          </ha-button>
+        </div>
+      </dialog>
     `;
 	}
 	renderList() {
@@ -1094,6 +1153,13 @@ var ke = class extends q {
 		}}
             >
               Reset
+            </ha-button>
+            <ha-button
+              size="s"
+              appearance="plain"
+              @click=${() => this.openDialog(e)}
+            >
+              Preview
             </ha-button>
             <ha-button
               size="s"
@@ -1261,6 +1327,51 @@ var ke = class extends q {
     .actions {
       justify-content: flex-end;
       gap: 8px;
+    }
+    dialog {
+      width: min(928px, calc(100vw - 32px)); /* two 440px panes, a 16px gap, padding */
+      padding: 0;
+      border: none;
+      border-radius: var(--ha-card-border-radius, 12px);
+      background: var(--card-background-color, var(--primary-background-color));
+      color: var(--primary-text-color);
+      box-shadow: var(--ha-card-box-shadow, 0 8px 24px rgba(0, 0, 0, 0.3));
+    }
+    dialog::backdrop {
+      background: rgba(0, 0, 0, 0.5);
+    }
+    .dialog-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 16px 0;
+    }
+    .dialog-content {
+      display: grid;
+      gap: 12px;
+      padding: 16px;
+    }
+    .dialog-panes {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 16px;
+    }
+    .dialog-square,
+    .preview-square {
+      width: 100%;
+      aspect-ratio: 1;
+      background: var(--primary-background-color);
+      overflow: hidden;
+      border: 1px solid var(--divider-color);
+      border-radius: 8px;
+    }
+    .dialog-square ha-code-editor {
+      display: block;
+      height: 100%;
+      --code-mirror-height: 100%;
+    }
+    .dialog-footer {
+      padding: 0 16px 16px;
     }
   `;
 	}
@@ -1485,6 +1596,7 @@ var Q = "ha_hue_entertainment", Me = `/config/integrations/integration/${Q}`, Ne
 		return F`
       <hue-scene-panel
         .scenes=${this.scenes}
+        .getScene=${(e) => this.call("scene", { scene: e })}
         .playing=${e.scene.id}
         .playingParams=${e.scene.params}
         .speed=${e.scene.speed}

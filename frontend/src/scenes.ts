@@ -14,10 +14,12 @@ class HueScenePanel extends LitElement {
   playingParams: Values | null = null;
   speed = 1;
   disabled = false;
+  getScene?: (id: string) => Promise<Record<string, unknown>>;
 
   private selected?: string;
   private drafts: Record<string, Values> = {}; // per scene, edits not yet played
   private speedDraft?: number;
+  private sceneJson = "";
 
   static properties = {
     scenes: { attribute: false },
@@ -25,9 +27,11 @@ class HueScenePanel extends LitElement {
     playingParams: { attribute: false },
     speed: { type: Number },
     disabled: { type: Boolean },
+    getScene: { attribute: false },
     selected: { state: true },
     drafts: { state: true },
     speedDraft: { state: true },
+    sceneJson: { state: true },
   };
 
   private get current(): SceneInfo | undefined {
@@ -72,6 +76,65 @@ class HueScenePanel extends LitElement {
     input?.click();
   }
 
+  private get dialog(): HTMLDialogElement | null | undefined {
+    return this.shadowRoot?.querySelector("dialog");
+  }
+
+  private async openDialog(scene: SceneInfo) {
+    this.dialog?.showModal();
+    this.sceneJson = "";
+    this.sceneJson = JSON.stringify(await this.getScene?.(scene.id), null, 2);
+
+    this.drawPreviewGrid();
+  }
+
+  private closeDialog() {
+    this.dialog?.close();
+  }
+
+  private get previewCanvas(): HTMLCanvasElement | null | undefined {
+    return this.shadowRoot?.getElementById("scene-preview") as HTMLCanvasElement;
+  }
+
+  private drawPreviewGrid() {
+    const canvas = this.previewCanvas;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    // Draw a simple isometric grid of dots to represent the room and walls, for context.
+    const floorSize = 16;
+    const wallHeight = 11;
+    const gap = 8;
+
+    const spacing = Math.min(
+      (canvas.width - 2 * gap) / (2 * 0.866 * (floorSize - 1) + 0.6),
+      (canvas.height - 2 * gap) / (floorSize - 1 + wallHeight - 1 + 0.6),
+    );
+
+    const ox = canvas.width / 2;
+    const oy = canvas.height / 2;
+
+    for (let x = 0; x < floorSize; x++)
+      for (let y = 0; y < wallHeight; y++)
+        for (let z = 0; z < floorSize; z++) {
+          if (x && y && z) continue; // only draw back faces
+
+          const pointX = ox + (x - z) * spacing * 0.866;
+          const pointY =
+            oy + ((x + z - (floorSize - 1)) * 0.5 - y + (wallHeight - 1) / 2) * spacing;
+
+          // shade different planes differerently to make it easier to see
+          const shade = Math.floor((y === 0 ? 1 : x === 0 ? 0.8 : 0.6) * 255);
+          ctx.fillStyle = `rgb(${shade}, ${shade}, ${shade})`;
+
+          ctx.beginPath();
+          ctx.arc(pointX, pointY, spacing * 0.3, 0, Math.PI * 2);
+          ctx.fill();
+        }
+  }
+
   private handleUpload(e: Event) {
     const input = e.target as HTMLInputElement;
     if (!input.files?.length) return;
@@ -94,6 +157,47 @@ class HueScenePanel extends LitElement {
       <div class="grid">
         ${this.renderList()} ${scene ? this.renderForm(scene) : nothing}
       </div>
+      ${this.renderDialog(scene)}
+    `;
+  }
+
+  private renderDialog(scene?: SceneInfo) {
+    return html`
+      <dialog
+        @click=${(e: Event) => {
+          if (e.target === e.currentTarget) this.closeDialog();
+        }}
+      >
+        <div class="dialog-header">
+          <span class="value">${scene?.name ?? ""}</span>
+          <ha-icon-button .label=${"Close"} @click=${() => this.closeDialog()}>
+            <ha-icon icon="mdi:close"></ha-icon>
+          </ha-icon-button>
+        </div>
+        <div class="dialog-content">
+          <div>${scene?.description ?? ""}</div>
+          <div class="dialog-panes">
+            <div class="dialog-square">
+              ${
+                customElements.get("ha-code-editor")
+                  ? html`<ha-code-editor
+                      mode="yaml"
+                      .value=${this.sceneJson}
+                    ></ha-code-editor>`
+                  : html`<textarea .value=${this.sceneJson}></textarea>`
+              }
+            </div>
+            <div class="preview-square">
+              <canvas id="scene-preview" width="440" height="440"></canvas>
+            </div>
+          </div>
+        </div>
+        <div class="row actions dialog-footer">
+          <ha-button size="s" appearance="plain" @click=${() => this.closeDialog()}>
+            Close
+          </ha-button>
+        </div>
+      </dialog>
     `;
   }
 
@@ -247,6 +351,13 @@ class HueScenePanel extends LitElement {
               }}
             >
               Reset
+            </ha-button>
+            <ha-button
+              size="s"
+              appearance="plain"
+              @click=${() => this.openDialog(scene)}
+            >
+              Preview
             </ha-button>
             <ha-button
               size="s"
@@ -428,6 +539,51 @@ class HueScenePanel extends LitElement {
     .actions {
       justify-content: flex-end;
       gap: 8px;
+    }
+    dialog {
+      width: min(928px, calc(100vw - 32px)); /* two 440px panes, a 16px gap, padding */
+      padding: 0;
+      border: none;
+      border-radius: var(--ha-card-border-radius, 12px);
+      background: var(--card-background-color, var(--primary-background-color));
+      color: var(--primary-text-color);
+      box-shadow: var(--ha-card-box-shadow, 0 8px 24px rgba(0, 0, 0, 0.3));
+    }
+    dialog::backdrop {
+      background: rgba(0, 0, 0, 0.5);
+    }
+    .dialog-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 16px 0;
+    }
+    .dialog-content {
+      display: grid;
+      gap: 12px;
+      padding: 16px;
+    }
+    .dialog-panes {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 16px;
+    }
+    .dialog-square,
+    .preview-square {
+      width: 100%;
+      aspect-ratio: 1;
+      background: var(--primary-background-color);
+      overflow: hidden;
+      border: 1px solid var(--divider-color);
+      border-radius: 8px;
+    }
+    .dialog-square ha-code-editor {
+      display: block;
+      height: 100%;
+      --code-mirror-height: 100%;
+    }
+    .dialog-footer {
+      padding: 0 16px 16px;
     }
   `;
 }
