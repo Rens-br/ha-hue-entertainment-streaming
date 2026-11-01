@@ -895,7 +895,7 @@ customElements.define("hue-room-preview", Oe);
 //#region src/scenes.ts
 var ke = class extends q {
 	constructor(...e) {
-		super(...e), this.scenes = [], this.playing = null, this.playingParams = null, this.speed = 1, this.disabled = !1, this.drafts = {}, this.sceneJson = "";
+		super(...e), this.scenes = [], this.playing = null, this.playingParams = null, this.speed = 1, this.disabled = !1, this.drafts = {}, this.sceneJson = "", this.previewError = "", this.points = [], this.previewRun = 0, this.dotRadius = 0, this.planes = [];
 	}
 	static {
 		this.properties = {
@@ -905,10 +905,12 @@ var ke = class extends q {
 			speed: { type: Number },
 			disabled: { type: Boolean },
 			getScene: { attribute: !1 },
+			subscribePreview: { attribute: !1 },
 			selected: { state: !0 },
 			drafts: { state: !0 },
 			speedDraft: { state: !0 },
-			sceneJson: { state: !0 }
+			sceneJson: { state: !0 },
+			previewError: { state: !0 }
 		};
 	}
 	get current() {
@@ -924,13 +926,16 @@ var ke = class extends q {
 		};
 	}
 	setValue(e, t, n) {
-		this.drafts = {
+		if (this.drafts = {
 			...this.drafts,
 			[e.id]: {
 				...this.drafts[e.id] ?? {},
 				[t]: n
 			}
-		};
+		}, this.dialog?.open && this.previewScene) {
+			let e = this.previewScene;
+			clearTimeout(this.editTimer), this.editTimer = window.setTimeout(() => this.startPreview(e), 300);
+		}
 	}
 	fire(e, t = {}) {
 		this.dispatchEvent(new CustomEvent(e, { detail: t }));
@@ -953,25 +958,102 @@ var ke = class extends q {
 	get dialog() {
 		return this.shadowRoot?.querySelector("dialog");
 	}
+	disconnectedCallback() {
+		super.disconnectedCallback(), this.stopPreview();
+	}
 	async openDialog(e) {
-		this.dialog?.showModal(), this.sceneJson = "", this.sceneJson = JSON.stringify(await this.getScene?.(e.id), null, 2), this.drawPreviewGrid();
+		this.dialog?.showModal(), this.sceneJson = "", this.previewError = "", this.layoutPreviewGrid(), this.drawPreview();
+		let t = await this.getScene?.(e.id);
+		this.sceneJson = JSON.stringify(t, null, 2), this.startPreview(t);
 	}
 	closeDialog() {
 		this.dialog?.close();
 	}
+	onEdit(e) {
+		clearTimeout(this.editTimer), this.editTimer = window.setTimeout(() => {
+			try {
+				this.startPreview(JSON.parse(e));
+			} catch (e) {
+				this.previewError = e.message;
+			}
+		}, 300);
+	}
+	async startPreview(e) {
+		console.log("startPreview", e), this.stopPreview();
+		let t = this.previewRun, n = e?.parameters ?? {}, r = Object.fromEntries(Object.entries(this.previewScene ? this.values(this.previewScene) : {}).filter(([e]) => e in n));
+		try {
+			let n = await this.subscribePreview?.(e, this.points.map((e) => e.position), r, (e) => this.drawPreview(e));
+			t === this.previewRun ? (this.unsubscribePreview = n, this.previewError = "", this.previewScene = e) : n?.();
+		} catch (e) {
+			t === this.previewRun && (this.previewError = e.message);
+		}
+	}
+	stopPreview() {
+		clearTimeout(this.editTimer), this.previewRun++, this.unsubscribePreview?.(), this.unsubscribePreview = void 0;
+	}
 	get previewCanvas() {
 		return this.shadowRoot?.getElementById("scene-preview");
 	}
-	drawPreviewGrid() {
+	layoutPreviewGrid() {
 		let e = this.previewCanvas;
 		if (!e) return;
-		let t = e.getContext("2d");
-		if (!t) return;
-		let n = Math.min((e.width - 16) / (25.98 + .6), (e.height - 16) / 25.6), r = e.width / 2, i = e.height / 2;
-		for (let e = 0; e < 16; e++) for (let a = 0; a < 11; a++) for (let o = 0; o < 16; o++) {
-			if (e && a && o) continue;
-			let s = r + (e - o) * n * .866, c = i + ((e + o - 15) * .5 - a + 5) * n, l = Math.floor((a === 0 ? 1 : e === 0 ? .8 : .6) * 255);
-			t.fillStyle = `rgb(${l}, ${l}, ${l})`, t.beginPath(), t.arc(s, c, n * .3, 0, Math.PI * 2), t.fill();
+		let t = Math.min((e.width - 16) / 27.712, (e.height - 16) / 26.5), n = e.width / 2, r = e.height / 2, i = (e, i, a) => [n + (e - a) * t * .866, r + ((e + a - 15) * .5 - i + 5) * t], a = (e, t) => e / (t - 1) * 2 - 1, o = -.5, s = 15.5, c = 10.5;
+		this.planes = [
+			{
+				fill: "rgba(0, 0, 0, 0.14)",
+				corners: [
+					i(o, o, o),
+					i(s, o, o),
+					i(s, o, s),
+					i(o, o, s)
+				]
+			},
+			{
+				fill: "rgba(0, 0, 0, 0.07)",
+				corners: [
+					i(o, o, o),
+					i(o, o, s),
+					i(o, c, s),
+					i(o, c, o)
+				]
+			},
+			{
+				fill: "rgba(0, 0, 0, 0.03)",
+				corners: [
+					i(o, o, o),
+					i(s, o, o),
+					i(s, c, o),
+					i(o, c, o)
+				]
+			}
+		], this.points = [];
+		for (let e = 0; e < 16; e++) for (let t = 0; t < 11; t++) for (let n = 0; n < 16; n++) {
+			if (e && t && n || [
+				e,
+				t,
+				n
+			].filter((e) => e === 0).length > 1) continue;
+			let [r, o] = i(e, t, n);
+			this.points.push({
+				x: r,
+				y: o,
+				position: [
+					a(e, 16),
+					a(n, 16),
+					a(t, 11)
+				]
+			});
+		}
+		this.dotRadius = t * .3;
+	}
+	drawPreview(e) {
+		let t = this.previewCanvas, n = t?.getContext("2d");
+		if (t && n) {
+			n.clearRect(0, 0, t.width, t.height), n.strokeStyle = "rgba(0, 0, 0, 0.3)", n.lineWidth = 1;
+			for (let e of this.planes) n.fillStyle = e.fill, n.beginPath(), e.corners.forEach(([e, t]) => n.lineTo(e, t)), n.closePath(), n.fill(), n.stroke();
+			this.points.forEach((t, r) => {
+				n.fillStyle = e?.[r] ?? "#ffffff", n.beginPath(), n.arc(t.x, t.y, this.dotRadius, 0, Math.PI * 2), n.fill();
+			});
 		}
 	}
 	handleUpload(e) {
@@ -997,8 +1079,10 @@ var ke = class extends q {
     `;
 	}
 	renderDialog(e) {
+		let t = Object.entries(this.previewScene?.parameters ?? e?.parameters ?? {}), n = e ? this.values(this.previewScene ?? e) : {};
 		return F`
       <dialog
+        @close=${() => this.stopPreview()}
         @click=${(e) => {
 			e.target === e.currentTarget && this.closeDialog();
 		}}
@@ -1013,12 +1097,30 @@ var ke = class extends q {
           <div>${e?.description ?? ""}</div>
           <div class="dialog-panes">
             <div class="dialog-square">
-              ${customElements.get("ha-code-editor") ? F`<ha-code-editor mode="yaml" .value=${this.sceneJson}></ha-code-editor>` : F`<textarea .value=${this.sceneJson}></textarea>`}
+              ${customElements.get("ha-code-editor") ? F`<ha-code-editor
+                      mode="yaml"
+                      .value=${this.sceneJson}
+                      @value-changed=${(e) => this.onEdit(e.detail.value)}
+                    ></ha-code-editor>` : F`<textarea
+                      .value=${this.sceneJson}
+                      @input=${(e) => this.onEdit(e.target.value)}
+                    ></textarea>`}
             </div>
             <div class="preview-square">
-            <canvas id="scene-preview" width="440" height="440"></canvas>
+              <canvas
+                id="scene-preview"
+                width="440"
+                height="440"
+                style="max-width: 100%"
+              ></canvas>
             </div>
           </div>
+          <div class="preview-settings">
+            ${t.length && this.previewScene ? F`<div class="preview-form">
+                    ${t.map(([e, t]) => this.field(this.previewScene, e, t, n[e]))}
+                  </div>` : F`<div class="secondary small">This scene has no settings.</div>`}
+          </div>
+          ${this.previewError ? F`<div class="preview-error">${this.previewError}</div>` : R}
         </div>
         <div class="row actions dialog-footer">
           <ha-button size="s" appearance="plain" @click=${() => this.closeDialog()}>
@@ -1310,6 +1412,18 @@ var ke = class extends q {
       display: grid;
       gap: 10px;
     }
+    .preview-form {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 8px;
+      column-rule: 1px solid var(--divider-color);
+      column-gap: 16px;
+    }
+    .preview-settings {
+      border: 1px solid var(--divider-color);
+      border-radius: 8px;
+      padding: 8px;
+    }
     .field span:first-child {
       color: var(--secondary-text-color);
       font-size: 14px;
@@ -1372,6 +1486,9 @@ var ke = class extends q {
     }
     .dialog-footer {
       padding: 0 16px 16px;
+    }
+    .preview-error {
+      color: var(--error-color);
     }
   `;
 	}
@@ -1597,6 +1714,12 @@ var Q = "ha_hue_entertainment", Me = `/config/integrations/integration/${Q}`, Ne
       <hue-scene-panel
         .scenes=${this.scenes}
         .getScene=${(e) => this.call("scene", { scene: e })}
+        .subscribePreview=${(e, t, n, r) => this.hass.connection.subscribeMessage((e) => r(e.colors), {
+			type: `${Q}/scene/preview`,
+			scene: e,
+			positions: t,
+			params: n
+		})}
         .playing=${e.scene.id}
         .playingParams=${e.scene.params}
         .speed=${e.scene.speed}

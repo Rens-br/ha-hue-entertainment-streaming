@@ -3,6 +3,7 @@ import { LitElement, css, html, nothing } from "lit";
 import type { SceneInfo, SceneParameter } from "./types";
 
 type Values = Record<string, unknown>;
+type Point = { x: number; y: number; position: number[] };
 
 /**
  * Scene list with play/stop and speed, and a parameter form generated from the
@@ -14,12 +15,25 @@ class HueScenePanel extends LitElement {
   playingParams: Values | null = null;
   speed = 1;
   disabled = false;
-  getScene?: (id: string) => Promise<Record<string, unknown>>;
+  getScene?: (id: string) => Promise<SceneInfo>;
+  subscribePreview?: (
+    scene: unknown,
+    positions: number[][],
+    parameters: Record<string, unknown>,
+    onColors: (colors: string[]) => void,
+  ) => Promise<() => Promise<void>>;
 
   private selected?: string;
   private drafts: Record<string, Values> = {}; // per scene, edits not yet played
   private speedDraft?: number;
   private sceneJson = "";
+  private previewError = "";
+  private points: Point[] = [];
+  private editTimer?: number;
+  private previewRun = 0;
+  private unsubscribePreview?: () => Promise<void>;
+
+  private previewScene?: SceneInfo | undefined;
 
   static properties = {
     scenes: { attribute: false },
@@ -28,10 +42,12 @@ class HueScenePanel extends LitElement {
     speed: { type: Number },
     disabled: { type: Boolean },
     getScene: { attribute: false },
+    subscribePreview: { attribute: false },
     selected: { state: true },
     drafts: { state: true },
     speedDraft: { state: true },
     sceneJson: { state: true },
+    previewError: { state: true },
   };
 
   private get current(): SceneInfo | undefined {
@@ -53,6 +69,11 @@ class HueScenePanel extends LitElement {
       ...this.drafts,
       [scene.id]: { ...(this.drafts[scene.id] ?? {}), [name]: value },
     };
+    if (this.dialog?.open && this.previewScene) {
+      const previewScene = this.previewScene;
+      clearTimeout(this.editTimer);
+      this.editTimer = window.setTimeout(() => this.startPreview(previewScene), 300);
+    }
   }
 
   private fire(type: string, detail: unknown = {}) {
@@ -80,59 +101,174 @@ class HueScenePanel extends LitElement {
     return this.shadowRoot?.querySelector("dialog");
   }
 
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    this.stopPreview();
+  }
+
   private async openDialog(scene: SceneInfo) {
     this.dialog?.showModal();
     this.sceneJson = "";
-    this.sceneJson = JSON.stringify(await this.getScene?.(scene.id), null, 2);
-
-    this.drawPreviewGrid();
+    this.previewError = "";
+    this.layoutPreviewGrid();
+    this.drawPreview();
+    const json = await this.getScene?.(scene.id);
+    this.sceneJson = JSON.stringify(json, null, 2);
+    this.startPreview(json);
   }
 
   private closeDialog() {
     this.dialog?.close();
   }
 
+  private onEdit(text: string) {
+    clearTimeout(this.editTimer);
+    this.editTimer = window.setTimeout(() => {
+      try {
+        this.startPreview(JSON.parse(text));
+      } catch (err) {
+        this.previewError = (err as Error).message;
+      }
+    }, 300);
+  }
+
+  private async startPreview(scene: SceneInfo | undefined) {
+    console.log("startPreview", scene);
+    this.stopPreview();
+    const run = this.previewRun;
+
+    // only parameters the edited scene still has; the server rejects unknown ones
+    const known = (scene as { parameters?: Values })?.parameters ?? {};
+    const values = Object.fromEntries(
+      Object.entries(this.previewScene ? this.values(this.previewScene) : {}).filter(
+        ([name]) => name in known,
+      ),
+    );
+    try {
+      const unsubscribe = await this.subscribePreview?.(
+        scene,
+        this.points.map((p) => p.position),
+        values,
+        (colors) => this.drawPreview(colors),
+      );
+      if (run === this.previewRun) {
+        this.unsubscribePreview = unsubscribe;
+        this.previewError = "";
+        this.previewScene = scene;
+      } else unsubscribe?.();
+    } catch (err) {
+      if (run === this.previewRun) this.previewError = (err as Error).message;
+    }
+  }
+
+  private stopPreview() {
+    clearTimeout(this.editTimer);
+    this.previewRun++;
+    this.unsubscribePreview?.();
+    this.unsubscribePreview = undefined;
+  }
+
   private get previewCanvas(): HTMLCanvasElement | null | undefined {
     return this.shadowRoot?.getElementById("scene-preview") as HTMLCanvasElement;
   }
 
-  private drawPreviewGrid() {
+  /** Dots for the floor and two back walls, with their Hue position (-1..1). */
+  private layoutPreviewGrid() {
     const canvas = this.previewCanvas;
     if (!canvas) return;
 
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
-    // Draw a simple isometric grid of dots to represent the room and walls, for context.
     const floorSize = 16;
     const wallHeight = 11;
     const gap = 8;
 
     const spacing = Math.min(
-      (canvas.width - 2 * gap) / (2 * 0.866 * (floorSize - 1) + 0.6),
-      (canvas.height - 2 * gap) / (floorSize - 1 + wallHeight - 1 + 0.6),
+      (canvas.width - 2 * gap) / (2 * 0.866 * floorSize),
+      (canvas.height - 2 * gap) / (floorSize + wallHeight - 0.5),
     );
 
     const ox = canvas.width / 2;
     const oy = canvas.height / 2;
+    const project = (x: number, y: number, z: number): [number, number] => [
+      ox + (x - z) * spacing * 0.866,
+      oy + ((x + z - (floorSize - 1)) * 0.5 - y + (wallHeight - 1) / 2) * spacing,
+    ];
+    const toHue = (i: number, size: number) => (i / (size - 1)) * 2 - 1;
 
+    const lo = -0.5;
+    const far = floorSize - 0.5;
+    const top = wallHeight - 0.5;
+    this.planes = [
+      {
+        fill: "rgba(0, 0, 0, 0.14)", // floor
+        corners: [
+          project(lo, lo, lo),
+          project(far, lo, lo),
+          project(far, lo, far),
+          project(lo, lo, far),
+        ],
+      },
+      {
+        fill: "rgba(0, 0, 0, 0.07)", // left wall
+        corners: [
+          project(lo, lo, lo),
+          project(lo, lo, far),
+          project(lo, top, far),
+          project(lo, top, lo),
+        ],
+      },
+      {
+        fill: "rgba(0, 0, 0, 0.03)", // right wall
+        corners: [
+          project(lo, lo, lo),
+          project(far, lo, lo),
+          project(far, top, lo),
+          project(lo, top, lo),
+        ],
+      },
+    ];
+
+    this.points = [];
     for (let x = 0; x < floorSize; x++)
       for (let y = 0; y < wallHeight; y++)
         for (let z = 0; z < floorSize; z++) {
           if (x && y && z) continue; // only draw back faces
+          if ([x, y, z].filter((i) => i === 0).length > 1) continue; // skip corners
 
-          const pointX = ox + (x - z) * spacing * 0.866;
-          const pointY =
-            oy + ((x + z - (floorSize - 1)) * 0.5 - y + (wallHeight - 1) / 2) * spacing;
-
-          // shade different planes differerently to make it easier to see
-          const shade = Math.floor((y === 0 ? 1 : x === 0 ? 0.8 : 0.6) * 255);
-          ctx.fillStyle = `rgb(${shade}, ${shade}, ${shade})`;
-
-          ctx.beginPath();
-          ctx.arc(pointX, pointY, spacing * 0.3, 0, Math.PI * 2);
-          ctx.fill();
+          const [px, py] = project(x, y, z);
+          this.points.push({
+            x: px,
+            y: py,
+            position: [toHue(x, floorSize), toHue(z, floorSize), toHue(y, wallHeight)],
+          });
         }
+    this.dotRadius = spacing * 0.3;
+  }
+
+  private dotRadius = 0;
+  private planes: { fill: string; corners: [number, number][] }[] = [];
+
+  private drawPreview(colors?: string[]) {
+    const canvas = this.previewCanvas;
+    const ctx = canvas?.getContext("2d");
+    if (!canvas || !ctx) return;
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.strokeStyle = "rgba(0, 0, 0, 0.3)";
+    ctx.lineWidth = 1;
+    for (const plane of this.planes) {
+      ctx.fillStyle = plane.fill;
+      ctx.beginPath();
+      plane.corners.forEach(([x, y]) => ctx.lineTo(x, y));
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+    }
+    this.points.forEach((p, i) => {
+      ctx.fillStyle = colors?.[i] ?? "#ffffff";
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, this.dotRadius, 0, Math.PI * 2);
+      ctx.fill();
+    });
   }
 
   private handleUpload(e: Event) {
@@ -162,8 +298,11 @@ class HueScenePanel extends LitElement {
   }
 
   private renderDialog(scene?: SceneInfo) {
+    const entries = Object.entries(this.previewScene?.parameters ?? scene?.parameters ?? {});
+    const values = scene ? this.values(this.previewScene ?? scene) : {};
     return html`
       <dialog
+        @close=${() => this.stopPreview()}
         @click=${(e: Event) => {
           if (e.target === e.currentTarget) this.closeDialog();
         }}
@@ -183,14 +322,39 @@ class HueScenePanel extends LitElement {
                   ? html`<ha-code-editor
                       mode="yaml"
                       .value=${this.sceneJson}
+                      @value-changed=${(e: CustomEvent<{ value: string }>) =>
+                        this.onEdit(e.detail.value)}
                     ></ha-code-editor>`
-                  : html`<textarea .value=${this.sceneJson}></textarea>`
+                  : html`<textarea
+                      .value=${this.sceneJson}
+                      @input=${(e: Event) =>
+                        this.onEdit((e.target as HTMLTextAreaElement).value)}
+                    ></textarea>`
               }
             </div>
             <div class="preview-square">
-              <canvas id="scene-preview" width="440" height="440"></canvas>
+              <canvas
+                id="scene-preview"
+                width="440"
+                height="440"
+                style="max-width: 100%"
+              ></canvas>
             </div>
           </div>
+          <div class="preview-settings">
+            ${
+              entries.length && this.previewScene
+                ? html`<div class="preview-form">
+                    ${entries.map(([name, p]) => this.field(this.previewScene!, name, p, values[name]))}
+                  </div>`
+                : html`<div class="secondary small">This scene has no settings.</div>`
+            }
+          </div>
+          ${
+            this.previewError
+              ? html`<div class="preview-error">${this.previewError}</div>`
+              : nothing
+          }
         </div>
         <div class="row actions dialog-footer">
           <ha-button size="s" appearance="plain" @click=${() => this.closeDialog()}>
@@ -522,6 +686,18 @@ class HueScenePanel extends LitElement {
       display: grid;
       gap: 10px;
     }
+    .preview-form {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 8px;
+      column-rule: 1px solid var(--divider-color);
+      column-gap: 16px;
+    }
+    .preview-settings {
+      border: 1px solid var(--divider-color);
+      border-radius: 8px;
+      padding: 8px;
+    }
     .field span:first-child {
       color: var(--secondary-text-color);
       font-size: 14px;
@@ -584,6 +760,9 @@ class HueScenePanel extends LitElement {
     }
     .dialog-footer {
       padding: 0 16px 16px;
+    }
+    .preview-error {
+      color: var(--error-color);
     }
   `;
 }

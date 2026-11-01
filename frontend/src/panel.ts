@@ -312,6 +312,16 @@ class HueEntertainmentPanel extends LitElement {
       <hue-scene-panel
         .scenes=${this.scenes}
         .getScene=${(id: string) => this.call<Record<string, unknown>>("scene", { scene: id })}
+        .subscribePreview=${(
+          scene: unknown,
+          positions: number[][],
+          parameters: Record<string, unknown>,
+          onColors: (colors: string[]) => void,
+        ) =>
+          this.hass!.connection.subscribeMessage<{ colors: string[] }>(
+            (msg) => onColors(msg.colors),
+            { type: `${DOMAIN}/scene/preview`, scene, positions, params: parameters },
+          )}
         .playing=${s.scene.id}
         .playingParams=${s.scene.params}
         .speed=${s.scene.speed}
