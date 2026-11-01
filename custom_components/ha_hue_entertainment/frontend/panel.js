@@ -254,34 +254,34 @@ var v = class extends HTMLElement {
 v.elementStyles = [], v.shadowRootOptions = { mode: "open" }, v[m("elementProperties")] = /* @__PURE__ */ new Map(), v[m("finalized")] = /* @__PURE__ */ new Map(), ie?.({ ReactiveElement: v }), (f.reactiveElementVersions ??= []).push("2.1.2");
 //#endregion
 //#region node_modules/lit-html/lit-html.js
-var y = globalThis, b = (e) => e, x = y.trustedTypes, S = x ? x.createPolicy("lit-html", { createHTML: (e) => e }) : void 0, C = "$lit$", w = `lit$${Math.random().toFixed(9).slice(2)}$`, T = "?" + w, ae = `<${T}>`, E = document, D = () => E.createComment(""), O = (e) => e === null || typeof e != "object" && typeof e != "function", k = Array.isArray, oe = (e) => k(e) || typeof e?.[Symbol.iterator] == "function", A = "[ 	\n\f\r]", j = /<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g, se = /-->/g, ce = />/g, M = RegExp(`>|${A}(?:([^\\s"'>=/]+)(${A}*=${A}*(?:[^ \t\n\f\r"'\`<>=]|("|')|))|$)`, "g"), le = /'/g, ue = /"/g, N = /^(?:script|style|textarea|title)$/i, P = (e) => (t, ...n) => ({
+var y = globalThis, b = (e) => e, x = y.trustedTypes, S = x ? x.createPolicy("lit-html", { createHTML: (e) => e }) : void 0, C = "$lit$", w = `lit$${Math.random().toFixed(9).slice(2)}$`, ae = "?" + w, oe = `<${ae}>`, T = document, E = () => T.createComment(""), D = (e) => e === null || typeof e != "object" && typeof e != "function", O = Array.isArray, se = (e) => O(e) || typeof e?.[Symbol.iterator] == "function", k = "[ 	\n\f\r]", A = /<(?:(!--|\/[^a-zA-Z])|(\/?[a-zA-Z][^>\s]*)|(\/?$))/g, ce = /-->/g, le = />/g, j = RegExp(`>|${k}(?:([^\\s"'>=/]+)(${k}*=${k}*(?:[^ \t\n\f\r"'\`<>=]|("|')|))|$)`, "g"), ue = /'/g, de = /"/g, M = /^(?:script|style|textarea|title)$/i, N = (e) => (t, ...n) => ({
 	_$litType$: e,
 	strings: t,
 	values: n
-}), F = P(1), I = P(2), L = Symbol.for("lit-noChange"), R = Symbol.for("lit-nothing"), z = /* @__PURE__ */ new WeakMap(), B = E.createTreeWalker(E, 129);
-function V(e, t) {
-	if (!k(e) || !e.hasOwnProperty("raw")) throw Error("invalid template strings array");
+}), P = N(1), F = N(2), I = Symbol.for("lit-noChange"), L = Symbol.for("lit-nothing"), R = /* @__PURE__ */ new WeakMap(), z = T.createTreeWalker(T, 129);
+function B(e, t) {
+	if (!O(e) || !e.hasOwnProperty("raw")) throw Error("invalid template strings array");
 	return S === void 0 ? t : S.createHTML(t);
 }
-var de = (e, t) => {
-	let n = e.length - 1, r = [], i, a = t === 2 ? "<svg>" : t === 3 ? "<math>" : "", o = j;
+var fe = (e, t) => {
+	let n = e.length - 1, r = [], i, a = t === 2 ? "<svg>" : t === 3 ? "<math>" : "", o = A;
 	for (let t = 0; t < n; t++) {
 		let n = e[t], s, c, l = -1, u = 0;
-		for (; u < n.length && (o.lastIndex = u, c = o.exec(n), c !== null);) u = o.lastIndex, o === j ? c[1] === "!--" ? o = se : c[1] === void 0 ? c[2] === void 0 ? c[3] !== void 0 && (o = M) : (N.test(c[2]) && (i = RegExp("</" + c[2], "g")), o = M) : o = ce : o === M ? c[0] === ">" ? (o = i ?? j, l = -1) : c[1] === void 0 ? l = -2 : (l = o.lastIndex - c[2].length, s = c[1], o = c[3] === void 0 ? M : c[3] === "\"" ? ue : le) : o === ue || o === le ? o = M : o === se || o === ce ? o = j : (o = M, i = void 0);
-		let d = o === M && e[t + 1].startsWith("/>") ? " " : "";
-		a += o === j ? n + ae : l >= 0 ? (r.push(s), n.slice(0, l) + C + n.slice(l) + w + d) : n + w + (l === -2 ? t : d);
+		for (; u < n.length && (o.lastIndex = u, c = o.exec(n), c !== null);) u = o.lastIndex, o === A ? c[1] === "!--" ? o = ce : c[1] === void 0 ? c[2] === void 0 ? c[3] !== void 0 && (o = j) : (M.test(c[2]) && (i = RegExp("</" + c[2], "g")), o = j) : o = le : o === j ? c[0] === ">" ? (o = i ?? A, l = -1) : c[1] === void 0 ? l = -2 : (l = o.lastIndex - c[2].length, s = c[1], o = c[3] === void 0 ? j : c[3] === "\"" ? de : ue) : o === de || o === ue ? o = j : o === ce || o === le ? o = A : (o = j, i = void 0);
+		let d = o === j && e[t + 1].startsWith("/>") ? " " : "";
+		a += o === A ? n + oe : l >= 0 ? (r.push(s), n.slice(0, l) + C + n.slice(l) + w + d) : n + w + (l === -2 ? t : d);
 	}
-	return [V(e, a + (e[n] || "<?>") + (t === 2 ? "</svg>" : t === 3 ? "</math>" : "")), r];
-}, H = class e {
+	return [B(e, a + (e[n] || "<?>") + (t === 2 ? "</svg>" : t === 3 ? "</math>" : "")), r];
+}, V = class e {
 	constructor({ strings: t, _$litType$: n }, r) {
 		let i;
 		this.parts = [];
-		let a = 0, o = 0, s = t.length - 1, c = this.parts, [l, u] = de(t, n);
-		if (this.el = e.createElement(l, r), B.currentNode = this.el.content, n === 2 || n === 3) {
+		let a = 0, o = 0, s = t.length - 1, c = this.parts, [l, u] = fe(t, n);
+		if (this.el = e.createElement(l, r), z.currentNode = this.el.content, n === 2 || n === 3) {
 			let e = this.el.content.firstChild;
 			e.replaceWith(...e.childNodes);
 		}
-		for (; (i = B.nextNode()) !== null && c.length < s;) {
+		for (; (i = z.nextNode()) !== null && c.length < s;) {
 			if (i.nodeType === 1) {
 				if (i.hasAttributes()) for (let e of i.getAttributeNames()) if (e.endsWith(C)) {
 					let t = u[o++], n = i.getAttribute(e).split(w), r = /([.?@])?(.*)/.exec(t);
@@ -290,25 +290,25 @@ var de = (e, t) => {
 						index: a,
 						name: r[2],
 						strings: n,
-						ctor: r[1] === "." ? pe : r[1] === "?" ? me : r[1] === "@" ? he : G
+						ctor: r[1] === "." ? me : r[1] === "?" ? he : r[1] === "@" ? ge : W
 					}), i.removeAttribute(e);
 				} else e.startsWith(w) && (c.push({
 					type: 6,
 					index: a
 				}), i.removeAttribute(e));
-				if (N.test(i.tagName)) {
+				if (M.test(i.tagName)) {
 					let e = i.textContent.split(w), t = e.length - 1;
 					if (t > 0) {
 						i.textContent = x ? x.emptyScript : "";
-						for (let n = 0; n < t; n++) i.append(e[n], D()), B.nextNode(), c.push({
+						for (let n = 0; n < t; n++) i.append(e[n], E()), z.nextNode(), c.push({
 							type: 2,
 							index: ++a
 						});
-						i.append(e[t], D());
+						i.append(e[t], E());
 					}
 				}
 			} else if (i.nodeType === 8) {
-				if (i.data === T) c.push({
+				if (i.data === ae) c.push({
 					type: 2,
 					index: a
 				});
@@ -324,16 +324,16 @@ var de = (e, t) => {
 		}
 	}
 	static createElement(e, t) {
-		let n = E.createElement("template");
+		let n = T.createElement("template");
 		return n.innerHTML = e, n;
 	}
 };
-function U(e, t, n = e, r) {
-	if (t === L) return t;
-	let i = r === void 0 ? n._$Cl : n._$Co?.[r], a = O(t) ? void 0 : t._$litDirective$;
-	return i?.constructor !== a && (i?._$AO?.(!1), a === void 0 ? i = void 0 : (i = new a(e), i._$AT(e, n, r)), r === void 0 ? n._$Cl = i : (n._$Co ??= [])[r] = i), i !== void 0 && (t = U(e, i._$AS(e, t.values), i, r)), t;
+function H(e, t, n = e, r) {
+	if (t === I) return t;
+	let i = r === void 0 ? n._$Cl : n._$Co?.[r], a = D(t) ? void 0 : t._$litDirective$;
+	return i?.constructor !== a && (i?._$AO?.(!1), a === void 0 ? i = void 0 : (i = new a(e), i._$AT(e, n, r)), r === void 0 ? n._$Cl = i : (n._$Co ??= [])[r] = i), i !== void 0 && (t = H(e, i._$AS(e, t.values), i, r)), t;
 }
-var fe = class {
+var pe = class {
 	constructor(e, t) {
 		this._$AV = [], this._$AN = void 0, this._$AD = e, this._$AM = t;
 	}
@@ -344,28 +344,28 @@ var fe = class {
 		return this._$AM._$AU;
 	}
 	u(e) {
-		let { el: { content: t }, parts: n } = this._$AD, r = (e?.creationScope ?? E).importNode(t, !0);
-		B.currentNode = r;
-		let i = B.nextNode(), a = 0, o = 0, s = n[0];
+		let { el: { content: t }, parts: n } = this._$AD, r = (e?.creationScope ?? T).importNode(t, !0);
+		z.currentNode = r;
+		let i = z.nextNode(), a = 0, o = 0, s = n[0];
 		for (; s !== void 0;) {
 			if (a === s.index) {
 				let t;
-				s.type === 2 ? t = new W(i, i.nextSibling, this, e) : s.type === 1 ? t = new s.ctor(i, s.name, s.strings, this, e) : s.type === 6 && (t = new ge(i, this, e)), this._$AV.push(t), s = n[++o];
+				s.type === 2 ? t = new U(i, i.nextSibling, this, e) : s.type === 1 ? t = new s.ctor(i, s.name, s.strings, this, e) : s.type === 6 && (t = new _e(i, this, e)), this._$AV.push(t), s = n[++o];
 			}
-			a !== s?.index && (i = B.nextNode(), a++);
+			a !== s?.index && (i = z.nextNode(), a++);
 		}
-		return B.currentNode = E, r;
+		return z.currentNode = T, r;
 	}
 	p(e) {
 		let t = 0;
 		for (let n of this._$AV) n !== void 0 && (n.strings === void 0 ? n._$AI(e[t]) : (n._$AI(e, n, t), t += n.strings.length - 2)), t++;
 	}
-}, W = class e {
+}, U = class e {
 	get _$AU() {
 		return this._$AM?._$AU ?? this._$Cv;
 	}
 	constructor(e, t, n, r) {
-		this.type = 2, this._$AH = R, this._$AN = void 0, this._$AA = e, this._$AB = t, this._$AM = n, this.options = r, this._$Cv = r?.isConnected ?? !0;
+		this.type = 2, this._$AH = L, this._$AN = void 0, this._$AA = e, this._$AB = t, this._$AM = n, this.options = r, this._$Cv = r?.isConnected ?? !0;
 	}
 	get parentNode() {
 		let e = this._$AA.parentNode, t = this._$AM;
@@ -378,7 +378,7 @@ var fe = class {
 		return this._$AB;
 	}
 	_$AI(e, t = this) {
-		e = U(this, e, t), O(e) ? e === R || e == null || e === "" ? (this._$AH !== R && this._$AR(), this._$AH = R) : e !== this._$AH && e !== L && this._(e) : e._$litType$ === void 0 ? e.nodeType === void 0 ? oe(e) ? this.k(e) : this._(e) : this.T(e) : this.$(e);
+		e = H(this, e, t), D(e) ? e === L || e == null || e === "" ? (this._$AH !== L && this._$AR(), this._$AH = L) : e !== this._$AH && e !== I && this._(e) : e._$litType$ === void 0 ? e.nodeType === void 0 ? se(e) ? this.k(e) : this._(e) : this.T(e) : this.$(e);
 	}
 	O(e) {
 		return this._$AA.parentNode.insertBefore(e, this._$AB);
@@ -387,24 +387,24 @@ var fe = class {
 		this._$AH !== e && (this._$AR(), this._$AH = this.O(e));
 	}
 	_(e) {
-		this._$AH !== R && O(this._$AH) ? this._$AA.nextSibling.data = e : this.T(E.createTextNode(e)), this._$AH = e;
+		this._$AH !== L && D(this._$AH) ? this._$AA.nextSibling.data = e : this.T(T.createTextNode(e)), this._$AH = e;
 	}
 	$(e) {
-		let { values: t, _$litType$: n } = e, r = typeof n == "number" ? this._$AC(e) : (n.el === void 0 && (n.el = H.createElement(V(n.h, n.h[0]), this.options)), n);
+		let { values: t, _$litType$: n } = e, r = typeof n == "number" ? this._$AC(e) : (n.el === void 0 && (n.el = V.createElement(B(n.h, n.h[0]), this.options)), n);
 		if (this._$AH?._$AD === r) this._$AH.p(t);
 		else {
-			let e = new fe(r, this), n = e.u(this.options);
+			let e = new pe(r, this), n = e.u(this.options);
 			e.p(t), this.T(n), this._$AH = e;
 		}
 	}
 	_$AC(e) {
-		let t = z.get(e.strings);
-		return t === void 0 && z.set(e.strings, t = new H(e)), t;
+		let t = R.get(e.strings);
+		return t === void 0 && R.set(e.strings, t = new V(e)), t;
 	}
 	k(t) {
-		k(this._$AH) || (this._$AH = [], this._$AR());
+		O(this._$AH) || (this._$AH = [], this._$AR());
 		let n = this._$AH, r, i = 0;
-		for (let a of t) i === n.length ? n.push(r = new e(this.O(D()), this.O(D()), this, this.options)) : r = n[i], r._$AI(a), i++;
+		for (let a of t) i === n.length ? n.push(r = new e(this.O(E()), this.O(E()), this, this.options)) : r = n[i], r._$AI(a), i++;
 		i < n.length && (this._$AR(r && r._$AB.nextSibling, i), n.length = i);
 	}
 	_$AR(e = this._$AA.nextSibling, t) {
@@ -416,7 +416,7 @@ var fe = class {
 	setConnected(e) {
 		this._$AM === void 0 && (this._$Cv = e, this._$AP?.(e));
 	}
-}, G = class {
+}, W = class {
 	get tagName() {
 		return this.element.tagName;
 	}
@@ -424,47 +424,47 @@ var fe = class {
 		return this._$AM._$AU;
 	}
 	constructor(e, t, n, r, i) {
-		this.type = 1, this._$AH = R, this._$AN = void 0, this.element = e, this.name = t, this._$AM = r, this.options = i, n.length > 2 || n[0] !== "" || n[1] !== "" ? (this._$AH = Array(n.length - 1).fill(/* @__PURE__ */ new String()), this.strings = n) : this._$AH = R;
+		this.type = 1, this._$AH = L, this._$AN = void 0, this.element = e, this.name = t, this._$AM = r, this.options = i, n.length > 2 || n[0] !== "" || n[1] !== "" ? (this._$AH = Array(n.length - 1).fill(/* @__PURE__ */ new String()), this.strings = n) : this._$AH = L;
 	}
 	_$AI(e, t = this, n, r) {
 		let i = this.strings, a = !1;
-		if (i === void 0) e = U(this, e, t, 0), a = !O(e) || e !== this._$AH && e !== L, a && (this._$AH = e);
+		if (i === void 0) e = H(this, e, t, 0), a = !D(e) || e !== this._$AH && e !== I, a && (this._$AH = e);
 		else {
 			let r = e, o, s;
-			for (e = i[0], o = 0; o < i.length - 1; o++) s = U(this, r[n + o], t, o), s === L && (s = this._$AH[o]), a ||= !O(s) || s !== this._$AH[o], s === R ? e = R : e !== R && (e += (s ?? "") + i[o + 1]), this._$AH[o] = s;
+			for (e = i[0], o = 0; o < i.length - 1; o++) s = H(this, r[n + o], t, o), s === I && (s = this._$AH[o]), a ||= !D(s) || s !== this._$AH[o], s === L ? e = L : e !== L && (e += (s ?? "") + i[o + 1]), this._$AH[o] = s;
 		}
 		a && !r && this.j(e);
 	}
 	j(e) {
-		e === R ? this.element.removeAttribute(this.name) : this.element.setAttribute(this.name, e ?? "");
+		e === L ? this.element.removeAttribute(this.name) : this.element.setAttribute(this.name, e ?? "");
 	}
-}, pe = class extends G {
+}, me = class extends W {
 	constructor() {
 		super(...arguments), this.type = 3;
 	}
 	j(e) {
-		this.element[this.name] = e === R ? void 0 : e;
+		this.element[this.name] = e === L ? void 0 : e;
 	}
-}, me = class extends G {
+}, he = class extends W {
 	constructor() {
 		super(...arguments), this.type = 4;
 	}
 	j(e) {
-		this.element.toggleAttribute(this.name, !!e && e !== R);
+		this.element.toggleAttribute(this.name, !!e && e !== L);
 	}
-}, he = class extends G {
+}, ge = class extends W {
 	constructor(e, t, n, r, i) {
 		super(e, t, n, r, i), this.type = 5;
 	}
 	_$AI(e, t = this) {
-		if ((e = U(this, e, t, 0) ?? R) === L) return;
-		let n = this._$AH, r = e === R && n !== R || e.capture !== n.capture || e.once !== n.once || e.passive !== n.passive, i = e !== R && (n === R || r);
+		if ((e = H(this, e, t, 0) ?? L) === I) return;
+		let n = this._$AH, r = e === L && n !== L || e.capture !== n.capture || e.once !== n.once || e.passive !== n.passive, i = e !== L && (n === L || r);
 		r && this.element.removeEventListener(this.name, this, n), i && this.element.addEventListener(this.name, this, e), this._$AH = e;
 	}
 	handleEvent(e) {
 		typeof this._$AH == "function" ? this._$AH.call(this.options?.host ?? this.element, e) : this._$AH.handleEvent(e);
 	}
-}, ge = class {
+}, _e = class {
 	constructor(e, t, n) {
 		this.element = e, this.type = 6, this._$AN = void 0, this._$AM = t, this.options = n;
 	}
@@ -472,18 +472,18 @@ var fe = class {
 		return this._$AM._$AU;
 	}
 	_$AI(e) {
-		U(this, e);
+		H(this, e);
 	}
-}, _e = y.litHtmlPolyfillSupport;
-_e?.(H, W), (y.litHtmlVersions ??= []).push("3.3.3");
-var ve = (e, t, n) => {
+}, ve = y.litHtmlPolyfillSupport;
+ve?.(V, U), (y.litHtmlVersions ??= []).push("3.3.3");
+var ye = (e, t, n) => {
 	let r = n?.renderBefore ?? t, i = r._$litPart$;
 	if (i === void 0) {
 		let e = n?.renderBefore ?? null;
-		r._$litPart$ = i = new W(t.insertBefore(D(), e), e, void 0, n ?? {});
+		r._$litPart$ = i = new U(t.insertBefore(E(), e), e, void 0, n ?? {});
 	}
 	return i._$AI(e), i;
-}, K = globalThis, q = class extends v {
+}, G = globalThis, K = class extends v {
 	constructor() {
 		super(...arguments), this.renderOptions = { host: this }, this._$Do = void 0;
 	}
@@ -493,7 +493,7 @@ var ve = (e, t, n) => {
 	}
 	update(e) {
 		let t = this.render();
-		this.hasUpdated || (this.renderOptions.isConnected = this.isConnected), super.update(e), this._$Do = ve(t, this.renderRoot, this.renderOptions);
+		this.hasUpdated || (this.renderOptions.isConnected = this.isConnected), super.update(e), this._$Do = ye(t, this.renderRoot, this.renderOptions);
 	}
 	connectedCallback() {
 		super.connectedCallback(), this._$Do?.setConnected(!0);
@@ -502,19 +502,19 @@ var ve = (e, t, n) => {
 		super.disconnectedCallback(), this._$Do?.setConnected(!1);
 	}
 	render() {
-		return L;
+		return I;
 	}
 };
-q._$litElement$ = !0, q.finalized = !0, K.litElementHydrateSupport?.({ LitElement: q });
-var ye = K.litElementPolyfillSupport;
-ye?.({ LitElement: q }), (K.litElementVersions ??= []).push("4.2.2");
+K._$litElement$ = !0, K.finalized = !0, G.litElementHydrateSupport?.({ LitElement: K });
+var be = G.litElementPolyfillSupport;
+be?.({ LitElement: K }), (G.litElementVersions ??= []).push("4.2.2");
 //#endregion
 //#region src/preview.ts
-var J = 440, be = 98, xe = 50, Se = 42, Ce = 312, we = J / 2, Te = 156, Y = (e) => ({
-	x: we + (e.x + e.y) * be,
-	y: Te + (e.x - e.y) * xe - e.z * Se
-}), X = (e) => e.map((e) => `${Y(e).x},${Y(e).y}`).join(" "), Ee = (e) => e.reduce((e, t) => e + t.x - t.y, 0) / e.length, Z = (e) => e.placed ?? e.position;
-function De(e, t, n) {
+var q = 440, xe = 98, Se = 50, Ce = 42, we = 312, Te = q / 2, Ee = 156, J = (e) => ({
+	x: Te + (e.x + e.y) * xe,
+	y: Ee + (e.x - e.y) * Se - e.z * Ce
+}), Y = (e) => e.map((e) => `${J(e).x},${J(e).y}`).join(" "), De = (e) => e.reduce((e, t) => e + t.x - t.y, 0) / e.length, X = (e) => e.placed ?? e.position;
+function Oe(e, t, n) {
 	let r = e.slice(1).map((t, n) => Math.hypot(t.x - e[n].x, t.y - e[n].y)), i = r.reduce((e, t) => e + t, 0), a = (t) => {
 		let n = t * i;
 		for (let t = 0; t < r.length; t++) {
@@ -531,7 +531,7 @@ function De(e, t, n) {
 	};
 	return [a(t), a(n)];
 }
-var Oe = class extends q {
+var ke = class extends K {
 	constructor(...e) {
 		super(...e), this.channels = [], this.lightInfo = [], this.colors = {}, this.active = !1;
 	}
@@ -573,16 +573,16 @@ var Oe = class extends q {
 		this.hovered = e;
 	}
 	render() {
-		if (!this.channels.length) return F`<div class="empty">
+		if (!this.channels.length) return P`<div class="empty">
         Choose an entertainment area to see its lights.
       </div>`;
-		let e = this.lights(), t = [...e].sort((e, t) => Ee(e.positions.length ? e.positions : e.channels.map(Z)) - Ee(t.positions.length ? t.positions : t.channels.map(Z)));
-		return F`
+		let e = this.lights(), t = [...e].sort((e, t) => De(e.positions.length ? e.positions : e.channels.map(X)) - De(t.positions.length ? t.positions : t.channels.map(X)));
+		return P`
       <div class="stage">
-        <svg viewBox="0 0 ${J} ${Ce}" class=${this.active ? "live" : "faded"}>
+        <svg viewBox="0 0 ${q} ${we}" class=${this.active ? "live" : "faded"}>
           <polygon
             class="wall left"
-            points=${X([
+            points=${Y([
 			{
 				x: -1,
 				y: 1,
@@ -607,7 +607,7 @@ var Oe = class extends q {
           ></polygon>
           <polygon
             class="wall front"
-            points=${X([
+            points=${Y([
 			{
 				x: -1,
 				y: 1,
@@ -632,7 +632,7 @@ var Oe = class extends q {
           ></polygon>
           <polygon
             class="floor"
-            points=${X([
+            points=${Y([
 			{
 				x: -1,
 				y: 1,
@@ -659,7 +659,7 @@ var Oe = class extends q {
                the Hue app shows it: TV backlights around the middle of the screen -->
           <polygon
             class="tv"
-            points=${X([
+            points=${Y([
 			{
 				x: -.3,
 				y: 1,
@@ -689,7 +689,7 @@ var Oe = class extends q {
         </div>
       </div>
       <div class="legend">
-        ${e.map((e) => F`
+        ${e.map((e) => P`
             <button
               class="chip"
               title="Paint ${e.name}"
@@ -698,7 +698,7 @@ var Oe = class extends q {
               @mouseleave=${() => this.hover()}
             >
               <span class="swatch">
-                ${e.channels.map((e) => F`<span style="background:${this.color(e)}"></span>`)}
+                ${e.channels.map((e) => P`<span style="background:${this.color(e)}"></span>`)}
               </span>
               <span class="chip-name">${e.name}</span>
               <span class="ids">${e.channels.map((e) => e.id).join(", ")}</span>
@@ -708,19 +708,19 @@ var Oe = class extends q {
     `;
 	}
 	pole(e) {
-		if (e.z <= -.97) return I``;
-		let t = Y({
+		if (e.z <= -.97) return F``;
+		let t = J({
 			...e,
 			z: -1
-		}), n = Y(e);
-		return I`
+		}), n = J(e);
+		return F`
       <line class="pole" x1=${t.x} y1=${t.y} x2=${n.x} y2=${n.y}></line>
       <ellipse class="foot" cx=${t.x} cy=${t.y} rx="4.5" ry="2.2"></ellipse>
     `;
 	}
 	dot(e) {
-		let t = e.channels[0], n = e.positions[0] ?? Z(t), { x: r, y: i } = Y(n), a = this.color(t), o = this.hovered === e;
-		return I`
+		let t = e.channels[0], n = e.positions[0] ?? X(t), { x: r, y: i } = J(n), a = this.color(t), o = this.hovered === e;
+		return F`
       <g class="light" @click=${() => this.paint([t])}
         @mouseenter=${() => this.hover(e)} @mouseleave=${() => this.hover()}>
         ${this.pole(n)}
@@ -730,8 +730,8 @@ var Oe = class extends q {
     `;
 	}
 	bar(e) {
-		let t = e.positions.map(Y), n = (e) => e.map((e, t) => `${t ? "L" : "M"}${e.x},${e.y}`).join(" "), r = t[0], i = t[t.length - 1], a = `g-${e.id}`, o = e.channels.length, s = e.channels.map((e, t) => I`<stop offset=${o > 1 ? t / (o - 1) : 0} stop-color=${this.color(e)}></stop>`), c = this.hovered === e;
-		return I`
+		let t = e.positions.map(J), n = (e) => e.map((e, t) => `${t ? "L" : "M"}${e.x},${e.y}`).join(" "), r = t[0], i = t[t.length - 1], a = `g-${e.id}`, o = e.channels.length, s = e.channels.map((e, t) => F`<stop offset=${o > 1 ? t / (o - 1) : 0} stop-color=${this.color(e)}></stop>`), c = this.hovered === e;
+		return F`
       <g class="light" @mouseenter=${() => this.hover(e)} @mouseleave=${() => this.hover()}>
         ${this.pole(e.positions[0])} ${this.pole(e.positions[e.positions.length - 1])}
         <defs>
@@ -741,7 +741,7 @@ var Oe = class extends q {
         <path d=${n(t)} stroke=${`url(#${a})`} class="bar-glow"></path>
         <path d=${n(t)} class="bar-edge"></path>
         <path d=${n(t)} stroke=${`url(#${a})`} class=${c ? "bar hot" : "bar"}></path>
-        ${e.channels.map((e, r) => I`<path class="hit-bar" d=${n(De(t, r / o, (r + 1) / o))}
+        ${e.channels.map((e, r) => F`<path class="hit-bar" d=${n(Oe(t, r / o, (r + 1) / o))}
             @click=${() => this.paint([e])}></path>`)}
       </g>
     `;
@@ -890,84 +890,148 @@ var Oe = class extends q {
   `;
 	}
 };
-customElements.define("hue-room-preview", Oe);
+customElements.define("hue-room-preview", ke);
 //#endregion
-//#region src/scenes.ts
-var ke = class extends q {
+//#region src/fields.ts
+function Ae(e, t, n, r) {
+	let i = e.replace(/_/g, " ");
+	if (t.type === "color") return P`
+      <label class="field">
+        <span>${i}</span>
+        <input
+          type="color"
+          .value=${Me(n)}
+          @input=${(e) => r(e.target.value)}
+        />
+      </label>
+    `;
+	if (t.type === "number") {
+		let e = Number(n), a = t.min ?? 0, o = t.max ?? Math.max(1, Number(t.default) * 2);
+		return P`
+      <label class="field">
+        <span>${i}</span>
+        <ha-slider
+          min=${a}
+          max=${o}
+          step=${(o - a) / 100}
+          .value=${e}
+          @input=${(e) => r(Number(e.target.value))}
+        ></ha-slider>
+        <span class="small num">${Ne(e)}</span>
+      </label>
+    `;
+	}
+	let a = t.options ?? [];
+	return a.length === 2 && a.every((e) => typeof e == "boolean") ? P`
+      <label class="field">
+        <span>${i}</span>
+        <ha-switch
+          .checked=${!!n}
+          @change=${(e) => r(e.target.checked)}
+        ></ha-switch>
+      </label>
+    ` : P`
+    <label class="field">
+      <span>${i}</span>
+      <select
+        @change=${(e) => r(a[Number(e.target.value)])}
+      >
+        ${a.map((e, t) => P`<option value=${t} ?selected=${e === n}>${String(e)}</option>`)}
+      </select>
+    </label>
+  `;
+}
+var je = o`
+  .field {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .field span:first-child {
+    color: var(--secondary-text-color);
+    font-size: 14px;
+    text-transform: capitalize;
+    min-width: 90px;
+  }
+  .field ha-slider {
+    flex: 1;
+    min-width: 0;
+  }
+  .small {
+    font-size: 13px;
+  }
+  .num {
+    min-width: 36px;
+    text-align: right;
+  }
+  select {
+    font: inherit;
+    color: inherit;
+    padding: 8px;
+    border-radius: 8px;
+    border: 1px solid var(--divider-color);
+    background: var(--secondary-background-color, transparent);
+  }
+  input[type="color"] {
+    width: 44px;
+    height: 28px;
+    padding: 0;
+    border: 1px solid var(--divider-color);
+    border-radius: 6px;
+    background: none;
+    cursor: pointer;
+  }
+`;
+function Me(e) {
+	return typeof e == "string" && /^#?[0-9a-f]{6}/i.test(e) ? `#${e.replace("#", "").slice(0, 6)}` : Array.isArray(e) && e.length >= 3 ? `#${e.slice(0, 3).map((e) => Math.max(0, Math.min(255, Math.round(Number(e)))).toString(16).padStart(2, "0")).join("")}` : "#000000";
+}
+function Ne(e) {
+	return Math.abs(e) >= 10 ? e.toFixed(0) : String(Number(e.toFixed(2)));
+}
+//#endregion
+//#region src/scene-editor.ts
+var Z = Math.sqrt(3) / 2, Pe = class extends K {
 	constructor(...e) {
-		super(...e), this.scenes = [], this.playing = null, this.playingParams = null, this.speed = 1, this.disabled = !1, this.drafts = {}, this.sceneJson = "", this.previewError = "", this.points = [], this.previewRun = 0, this.dotRadius = 0, this.planes = [];
+		super(...e), this.params = {}, this.sceneJson = "", this.previewError = "", this.points = [], this.planes = [], this.dotRadius = 0, this.previewRun = 0;
 	}
 	static {
 		this.properties = {
-			scenes: { attribute: !1 },
-			playing: { attribute: !1 },
-			playingParams: { attribute: !1 },
-			speed: { type: Number },
-			disabled: { type: Boolean },
 			getScene: { attribute: !1 },
 			subscribePreview: { attribute: !1 },
-			selected: { state: !0 },
-			drafts: { state: !0 },
-			speedDraft: { state: !0 },
+			scene: { state: !0 },
+			params: { state: !0 },
 			sceneJson: { state: !0 },
 			previewError: { state: !0 }
 		};
 	}
-	get current() {
-		let e = this.selected ?? this.playing ?? this.scenes[0]?.id;
-		return this.scenes.find((t) => t.id === e);
-	}
-	values(e) {
-		let t = Object.fromEntries(Object.entries(e.parameters).map(([e, t]) => [e, t.default])), n = e.id === this.playing ? this.playingParams ?? {} : {};
-		return {
-			...t,
-			...n,
-			...this.drafts[e.id] ?? {}
-		};
-	}
-	setValue(e, t, n) {
-		if (this.drafts = {
-			...this.drafts,
-			[e.id]: {
-				...this.drafts[e.id] ?? {},
-				[t]: n
-			}
-		}, this.dialog?.open && this.previewScene) {
-			let e = this.previewScene;
-			clearTimeout(this.editTimer), this.editTimer = window.setTimeout(() => this.startPreview(e), 300);
-		}
-	}
-	fire(e, t = {}) {
-		this.dispatchEvent(new CustomEvent(e, { detail: t }));
-	}
-	play(e, t) {
-		this.fire("play", {
-			scene: e.id,
-			params: t
-		});
-	}
-	reloadScenes() {
-		this.fire("reload-scenes");
-	}
-	downloadScene(e) {
-		this.fire("download-scene", { scene: e.id });
-	}
-	uploadScene() {
-		(this.shadowRoot?.getElementById("scene-upload"))?.click();
-	}
-	get dialog() {
-		return this.shadowRoot?.querySelector("dialog");
+	async open(e, t = {}) {
+		this.dialog?.showModal(), this.scene = void 0, this.params = t, this.sceneJson = "", this.previewError = "", this.layoutPreviewGrid(), this.drawPreview();
+		let n = await this.getScene?.(e);
+		this.sceneJson = JSON.stringify(n, null, 2), n && this.startPreview(n);
 	}
 	disconnectedCallback() {
 		super.disconnectedCallback(), this.stopPreview();
 	}
-	async openDialog(e) {
-		this.dialog?.showModal(), this.sceneJson = "", this.previewError = "", this.layoutPreviewGrid(), this.drawPreview();
-		let t = await this.getScene?.(e.id);
-		this.sceneJson = JSON.stringify(t, null, 2), this.startPreview(t);
+	get dialog() {
+		return this.shadowRoot?.querySelector("dialog");
 	}
-	closeDialog() {
+	get previewCanvas() {
+		return this.shadowRoot?.getElementById("scene-preview");
+	}
+	close() {
 		this.dialog?.close();
+	}
+	values(e) {
+		return Object.fromEntries(Object.entries(e.parameters ?? {}).map(([e, t]) => [e, e in this.params ? this.params[e] : t.default]));
+	}
+	setValue(e, t) {
+		this.params = {
+			...this.params,
+			[e]: t
+		};
+		let n = this.scene;
+		n && (clearTimeout(this.editTimer), this.editTimer = window.setTimeout(() => this.startPreview(n), 300));
 	}
 	onEdit(e) {
 		clearTimeout(this.editTimer), this.editTimer = window.setTimeout(() => {
@@ -979,11 +1043,11 @@ var ke = class extends q {
 		}, 300);
 	}
 	async startPreview(e) {
-		console.log("startPreview", e), this.stopPreview();
-		let t = this.previewRun, n = e?.parameters ?? {}, r = Object.fromEntries(Object.entries(this.previewScene ? this.values(this.previewScene) : {}).filter(([e]) => e in n));
+		this.stopPreview();
+		let t = this.previewRun;
 		try {
-			let n = await this.subscribePreview?.(e, this.points.map((e) => e.position), r, (e) => this.drawPreview(e));
-			t === this.previewRun ? (this.unsubscribePreview = n, this.previewError = "", this.previewScene = e) : n?.();
+			let n = await this.subscribePreview?.(e, this.points.map((e) => e.position), this.values(e), (e) => this.drawPreview(e));
+			t === this.previewRun ? (this.unsubscribePreview = n, this.previewError = "", this.scene = e) : n?.();
 		} catch (e) {
 			t === this.previewRun && (this.previewError = e.message);
 		}
@@ -991,48 +1055,72 @@ var ke = class extends q {
 	stopPreview() {
 		clearTimeout(this.editTimer), this.previewRun++, this.unsubscribePreview?.(), this.unsubscribePreview = void 0;
 	}
-	get previewCanvas() {
-		return this.shadowRoot?.getElementById("scene-preview");
-	}
 	layoutPreviewGrid() {
 		let e = this.previewCanvas;
 		if (!e) return;
-		let t = Math.min((e.width - 16) / 27.712, (e.height - 16) / 26.5), n = e.width / 2, r = e.height / 2, i = (e, i, a) => [n + (e - a) * t * .866, r + ((e + a - 15) * .5 - i + 5) * t], a = (e, t) => e / (t - 1) * 2 - 1, o = -.5, s = 15.5, c = 10.5;
+		let t = Math.min((e.width - 16) / (2 * Z * 16), (e.height - 16) / 26.5), n = e.width / 2, r = e.height / 2, i = (e, i, a) => [n + (e - a) * t * Z, r + ((e + a - 15) * .5 - i + 5) * t], a = (e, t) => e / (t - 1) * 2 - 1, o = (e, ...t) => ({
+			fill: `rgba(0, 0, 0, ${e})`,
+			corners: t.map(([e, t, n]) => i(e, t, n))
+		}), s = -.5, c = 15.5, l = 10.5;
 		this.planes = [
-			{
-				fill: "rgba(0, 0, 0, 0.14)",
-				corners: [
-					i(o, o, o),
-					i(s, o, o),
-					i(s, o, s),
-					i(o, o, s)
-				]
-			},
-			{
-				fill: "rgba(0, 0, 0, 0.07)",
-				corners: [
-					i(o, o, o),
-					i(o, o, s),
-					i(o, c, s),
-					i(o, c, o)
-				]
-			},
-			{
-				fill: "rgba(0, 0, 0, 0.03)",
-				corners: [
-					i(o, o, o),
-					i(s, o, o),
-					i(s, c, o),
-					i(o, c, o)
-				]
-			}
+			o(.14, [
+				s,
+				s,
+				s
+			], [
+				c,
+				s,
+				s
+			], [
+				c,
+				s,
+				c
+			], [
+				s,
+				s,
+				c
+			]),
+			o(.07, [
+				s,
+				s,
+				s
+			], [
+				s,
+				s,
+				c
+			], [
+				s,
+				l,
+				c
+			], [
+				s,
+				l,
+				s
+			]),
+			o(.03, [
+				s,
+				s,
+				s
+			], [
+				c,
+				s,
+				s
+			], [
+				c,
+				l,
+				s
+			], [
+				s,
+				l,
+				s
+			])
 		], this.points = [];
 		for (let e = 0; e < 16; e++) for (let t = 0; t < 11; t++) for (let n = 0; n < 16; n++) {
-			if (e && t && n || [
+			if ([
 				e,
 				t,
 				n
-			].filter((e) => e === 0).length > 1) continue;
+			].filter((e) => e === 0).length !== 1) continue;
 			let [r, o] = i(e, t, n);
 			this.points.push({
 				x: r,
@@ -1056,6 +1144,213 @@ var ke = class extends q {
 			});
 		}
 	}
+	render() {
+		let e = this.scene;
+		return P`
+      <dialog
+        @close=${() => this.stopPreview()}
+        @click=${(e) => {
+			e.target === e.currentTarget && this.close();
+		}}
+      >
+        <div class="header">
+          <span class="title">${e?.name ?? ""}</span>
+          <ha-icon-button .label=${"Close"} @click=${() => this.close()}>
+            <ha-icon icon="mdi:close"></ha-icon>
+          </ha-icon-button>
+        </div>
+        <div class="content">
+          <div>${e?.description ?? ""}</div>
+          <div class="panes">
+            <div class="editor-pane">${this.renderEditor()}</div>
+            <div class="preview-pane">
+              <canvas id="scene-preview" width="440" height="440"></canvas>
+            </div>
+          </div>
+          ${this.renderSettings()}
+          ${this.previewError ? P`<div class="error">${this.previewError}</div>` : L}
+        </div>
+        <div class="footer">
+          <ha-button size="s" appearance="plain" @click=${() => this.close()}>
+            Close
+          </ha-button>
+        </div>
+      </dialog>
+    `;
+	}
+	renderEditor() {
+		return customElements.get("ha-code-editor") ? P`<ha-code-editor
+          mode="yaml"
+          .value=${this.sceneJson}
+          @value-changed=${(e) => this.onEdit(e.detail.value)}
+        ></ha-code-editor>` : P`<textarea
+          .value=${this.sceneJson}
+          @input=${(e) => this.onEdit(e.target.value)}
+        ></textarea>`;
+	}
+	renderSettings() {
+		let e = this.scene, t = Object.entries(e?.parameters ?? {}), n = e ? this.values(e) : {};
+		return P`
+      <div class="settings">
+        ${t.length ? P`<div class="settings-form">
+                ${t.map(([e, t]) => Ae(e, t, n[e], (t) => this.setValue(e, t)))}
+              </div>` : P`<div class="secondary small">This scene has no settings.</div>`}
+      </div>
+    `;
+	}
+	static {
+		this.styles = [je, o`
+      .title {
+        font-size: 16px;
+        font-weight: 500;
+      }
+      .secondary {
+        color: var(--secondary-text-color);
+      }
+      ha-icon-button,
+      ha-button {
+        --ha-icon-button-size: 24px;
+        --mdc-icon-button-size: 24px;
+        --mdc-icon-size: 16px;
+      }
+      /* two 440px panes, a 16px gap, padding */
+      dialog {
+        width: min(928px, calc(100vw - 32px));
+        padding: 0;
+        border: none;
+        border-radius: var(--ha-card-border-radius, 12px);
+        background: var(--card-background-color, var(--primary-background-color));
+        color: var(--primary-text-color);
+        box-shadow: var(--ha-card-box-shadow, 0 8px 24px rgba(0, 0, 0, 0.3));
+      }
+      dialog::backdrop {
+        background: rgba(0, 0, 0, 0.5);
+      }
+      .header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 16px 16px 0;
+      }
+      .content {
+        display: grid;
+        gap: 12px;
+        padding: 16px;
+      }
+      .panes {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        gap: 16px;
+      }
+      .editor-pane,
+      .preview-pane {
+        width: 100%;
+        aspect-ratio: 1;
+        background: var(--primary-background-color);
+        overflow: hidden;
+        border: 1px solid var(--divider-color);
+        border-radius: 8px;
+      }
+      .editor-pane ha-code-editor,
+      .editor-pane textarea {
+        display: block;
+        box-sizing: border-box;
+        width: 100%;
+        height: 100%;
+        --code-mirror-height: 100%;
+      }
+      .editor-pane textarea {
+        border: none;
+        padding: 8px;
+        resize: none;
+        font-family: var(--code-font-family, monospace);
+        background: transparent;
+        color: inherit;
+      }
+      .preview-pane canvas {
+        max-width: 100%;
+      }
+      .settings-form {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 8px;
+        column-gap: 16px;
+        column-rule: 1px solid var(--divider-color);
+      }
+      .settings {
+        border: 1px solid var(--divider-color);
+        border-radius: 8px;
+        padding: 8px;
+      }
+      .footer {
+        display: flex;
+        justify-content: flex-end;
+        padding: 0 16px 16px;
+      }
+      .error {
+        color: var(--error-color);
+      }
+    `];
+	}
+};
+customElements.define("hue-scene-editor", Pe);
+//#endregion
+//#region src/scenes.ts
+var Fe = class extends K {
+	constructor(...e) {
+		super(...e), this.scenes = [], this.playing = null, this.playingParams = null, this.speed = 1, this.disabled = !1, this.drafts = {};
+	}
+	static {
+		this.properties = {
+			scenes: { attribute: !1 },
+			playing: { attribute: !1 },
+			playingParams: { attribute: !1 },
+			speed: { type: Number },
+			disabled: { type: Boolean },
+			selected: { state: !0 },
+			drafts: { state: !0 },
+			speedDraft: { state: !0 }
+		};
+	}
+	get current() {
+		let e = this.selected ?? this.playing ?? this.scenes[0]?.id;
+		return this.scenes.find((t) => t.id === e);
+	}
+	values(e) {
+		let t = Object.fromEntries(Object.entries(e.parameters).map(([e, t]) => [e, t.default])), n = e.id === this.playing ? this.playingParams ?? {} : {};
+		return {
+			...t,
+			...n,
+			...this.drafts[e.id] ?? {}
+		};
+	}
+	setValue(e, t, n) {
+		this.drafts = {
+			...this.drafts,
+			[e.id]: {
+				...this.drafts[e.id] ?? {},
+				[t]: n
+			}
+		};
+	}
+	fire(e, t = {}) {
+		this.dispatchEvent(new CustomEvent(e, { detail: t }));
+	}
+	play(e, t) {
+		this.fire("play", {
+			scene: e.id,
+			params: t
+		});
+	}
+	reloadScenes() {
+		this.fire("reload-scenes");
+	}
+	downloadScene(e) {
+		this.fire("download-scene", { scene: e.id });
+	}
+	uploadScene() {
+		(this.shadowRoot?.getElementById("scene-upload"))?.click();
+	}
 	handleUpload(e) {
 		let t = e.target;
 		if (!t.files?.length) return;
@@ -1071,68 +1366,15 @@ var ke = class extends q {
 	}
 	render() {
 		let e = this.current;
-		return F`
+		return P`
       <div class="grid">
-        ${this.renderList()} ${e ? this.renderForm(e) : R}
+        ${this.renderList()} ${e ? this.renderForm(e) : L}
       </div>
-      ${this.renderDialog(e)}
-    `;
-	}
-	renderDialog(e) {
-		let t = Object.entries(this.previewScene?.parameters ?? e?.parameters ?? {}), n = e ? this.values(this.previewScene ?? e) : {};
-		return F`
-      <dialog
-        @close=${() => this.stopPreview()}
-        @click=${(e) => {
-			e.target === e.currentTarget && this.closeDialog();
-		}}
-      >
-        <div class="dialog-header">
-          <span class="value">${e?.name ?? ""}</span>
-          <ha-icon-button .label=${"Close"} @click=${() => this.closeDialog()}>
-            <ha-icon icon="mdi:close"></ha-icon>
-          </ha-icon-button>
-        </div>
-        <div class="dialog-content">
-          <div>${e?.description ?? ""}</div>
-          <div class="dialog-panes">
-            <div class="dialog-square">
-              ${customElements.get("ha-code-editor") ? F`<ha-code-editor
-                      mode="yaml"
-                      .value=${this.sceneJson}
-                      @value-changed=${(e) => this.onEdit(e.detail.value)}
-                    ></ha-code-editor>` : F`<textarea
-                      .value=${this.sceneJson}
-                      @input=${(e) => this.onEdit(e.target.value)}
-                    ></textarea>`}
-            </div>
-            <div class="preview-square">
-              <canvas
-                id="scene-preview"
-                width="440"
-                height="440"
-                style="max-width: 100%"
-              ></canvas>
-            </div>
-          </div>
-          <div class="preview-settings">
-            ${t.length && this.previewScene ? F`<div class="preview-form">
-                    ${t.map(([e, t]) => this.field(this.previewScene, e, t, n[e]))}
-                  </div>` : F`<div class="secondary small">This scene has no settings.</div>`}
-          </div>
-          ${this.previewError ? F`<div class="preview-error">${this.previewError}</div>` : R}
-        </div>
-        <div class="row actions dialog-footer">
-          <ha-button size="s" appearance="plain" @click=${() => this.closeDialog()}>
-            Close
-          </ha-button>
-        </div>
-      </dialog>
     `;
 	}
 	renderList() {
 		let e = this.speedDraft ?? this.speed;
-		return F`
+		return P`
       <input
         type="file"
         id="scene-upload"
@@ -1171,14 +1413,14 @@ var ke = class extends q {
           <div class="list">
             ${this.scenes.map((e) => {
 			let t = e.id === this.playing;
-			return F`
+			return P`
                 <div
                   class="scene ${t ? "on" : ""} ${e.id === this.current?.id ? "selected" : ""}"
                   @click=${() => this.selected = e.id}
                 >
                   <div class="scene-text">
                     <div class="name">${e.name}</div>
-                    ${e.description ? F`<div class="secondary small">${e.description}</div>` : R}
+                    ${e.description ? P`<div class="secondary small">${e.description}</div>` : L}
                   </div>
                   <span class="tag">${e.builtin ? "built-in" : "yours"}</span>
                   <ha-button
@@ -1216,7 +1458,7 @@ var ke = class extends q {
 	}
 	renderForm(e) {
 		let t = Object.entries(e.parameters), n = this.values(e);
-		return F`
+		return P`
       <ha-card
         ><div class="card-content">
           <div class="row">
@@ -1228,7 +1470,7 @@ var ke = class extends q {
               >
                 <ha-icon icon="mdi:download"></ha-icon>
               </ha-icon-button>
-              ${e.builtin ? R : F`
+              ${e.builtin ? L : P`
                       <ha-button
                         size="xs"
                         appearance="plain"
@@ -1241,9 +1483,9 @@ var ke = class extends q {
                     `}
             </div>
           </div>
-          ${t.length ? F`<div class="form">
-                  ${t.map(([t, r]) => this.field(e, t, r, n[t]))}
-                </div>` : F`<div class="secondary small">This scene has no settings.</div>`}
+          ${t.length ? P`<div class="form">
+                  ${t.map(([t, r]) => Ae(t, r, n[t], (n) => this.setValue(e, t, n)))}
+                </div>` : P`<div class="secondary small">This scene has no settings.</div>`}
           <div class="row actions">
             <ha-button
               size="s"
@@ -1259,7 +1501,10 @@ var ke = class extends q {
             <ha-button
               size="s"
               appearance="plain"
-              @click=${() => this.openDialog(e)}
+              @click=${() => this.fire("edit-scene", {
+			scene: e.id,
+			params: n
+		})}
             >
               Preview
             </ha-button>
@@ -1276,233 +1521,87 @@ var ke = class extends q {
       >
     `;
 	}
-	field(e, t, n, r) {
-		let i = t.replace(/_/g, " "), a = (n) => this.setValue(e, t, n);
-		if (n.type === "color") return F`
-        <label class="field">
-          <span>${i}</span>
-          <input
-            type="color"
-            .value=${Ae(r)}
-            @input=${(e) => a(e.target.value)}
-          />
-        </label>
-      `;
-		if (n.type === "number") {
-			let e = Number(r), t = n.min ?? 0, o = n.max ?? Math.max(1, Number(n.default) * 2);
-			return F`
-        <label class="field">
-          <span>${i}</span>
-          <ha-slider
-            min=${t}
-            max=${o}
-            step=${(o - t) / 100}
-            .value=${e}
-            @input=${(e) => a(Number(e.target.value))}
-          ></ha-slider>
-          <span class="small num">${je(e)}</span>
-        </label>
-      `;
-		}
-		let o = n.options ?? [];
-		return o.length === 2 && o.every((e) => typeof e == "boolean") ? F`
-        <label class="field">
-          <span>${i}</span>
-          <ha-switch
-            .checked=${!!r}
-            @change=${(e) => a(e.target.checked)}
-          ></ha-switch>
-        </label>
-      ` : F`
-      <label class="field">
-        <span>${i}</span>
-        <select
-          @change=${(e) => a(o[Number(e.target.value)])}
-        >
-          ${o.map((e, t) => F`<option value=${t} ?selected=${e === r}>${String(e)}</option>`)}
-        </select>
-      </label>
-    `;
-	}
 	static {
-		this.styles = o`
-    .card-content {
-      padding: 16px;
-      display: grid;
-      grid-template-columns: minmax(0, 1fr);
-      gap: 12px;
-    }
-    .row,
-    .field {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-    }
-    .value {
-      font-size: 16px;
-      font-weight: 500;
-    }
-    .secondary {
-      color: var(--secondary-text-color);
-    }
-    .small {
-      font-size: 13px;
-    }
-    select {
-      font: inherit;
-      color: inherit;
-      padding: 8px;
-      border-radius: 8px;
-      border: 1px solid var(--divider-color);
-      background: var(--secondary-background-color, transparent);
-    }
-    input[type="color"] {
-      width: 44px;
-      height: 28px;
-      padding: 0;
-      border: 1px solid var(--divider-color);
-      border-radius: 6px;
-      background: none;
-      cursor: pointer;
-    }
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 16px;
-    }
-    .list {
-      display: grid;
-    }
-    .scene {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 8px;
-      border-top: 1px solid var(--divider-color);
-      cursor: pointer;
-    }
-    .scene.selected {
-      background: var(--secondary-background-color, rgba(127, 127, 127, 0.08));
-      border-radius: 8px;
-    }
-    .scene.on .name {
-      color: var(--primary-color);
-      font-weight: 500;
-    }
-    .scene-text {
-      flex: 1;
-      min-width: 0;
-    }
-    .tag {
-      font-size: 12px;
-      color: var(--secondary-text-color);
-    }
-    ha-icon-button,
-    ha-button {
-      --ha-icon-button-size: 24px;
-      --mdc-icon-button-size: 24px;
-      --mdc-icon-size: 16px;
-    }
-    .speed ha-slider {
-      flex: 1;
-      min-width: 0;
-    }
-    .form {
-      display: grid;
-      gap: 10px;
-    }
-    .preview-form {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-      gap: 8px;
-      column-rule: 1px solid var(--divider-color);
-      column-gap: 16px;
-    }
-    .preview-settings {
-      border: 1px solid var(--divider-color);
-      border-radius: 8px;
-      padding: 8px;
-    }
-    .field span:first-child {
-      color: var(--secondary-text-color);
-      font-size: 14px;
-      text-transform: capitalize;
-      min-width: 90px;
-    }
-    .field ha-slider {
-      flex: 1;
-      min-width: 0;
-    }
-    .num {
-      min-width: 36px;
-      text-align: right;
-    }
-    .actions {
-      justify-content: flex-end;
-      gap: 8px;
-    }
-    dialog {
-      width: min(928px, calc(100vw - 32px)); /* two 440px panes, a 16px gap, padding */
-      padding: 0;
-      border: none;
-      border-radius: var(--ha-card-border-radius, 12px);
-      background: var(--card-background-color, var(--primary-background-color));
-      color: var(--primary-text-color);
-      box-shadow: var(--ha-card-box-shadow, 0 8px 24px rgba(0, 0, 0, 0.3));
-    }
-    dialog::backdrop {
-      background: rgba(0, 0, 0, 0.5);
-    }
-    .dialog-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 16px 16px 0;
-    }
-    .dialog-content {
-      display: grid;
-      gap: 12px;
-      padding: 16px;
-    }
-    .dialog-panes {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-      gap: 16px;
-    }
-    .dialog-square,
-    .preview-square {
-      width: 100%;
-      aspect-ratio: 1;
-      background: var(--primary-background-color);
-      overflow: hidden;
-      border: 1px solid var(--divider-color);
-      border-radius: 8px;
-    }
-    .dialog-square ha-code-editor {
-      display: block;
-      height: 100%;
-      --code-mirror-height: 100%;
-    }
-    .dialog-footer {
-      padding: 0 16px 16px;
-    }
-    .preview-error {
-      color: var(--error-color);
-    }
-  `;
+		this.styles = [je, o`
+      .card-content {
+        padding: 16px;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 12px;
+      }
+      .row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+      }
+      .value {
+        font-size: 16px;
+        font-weight: 500;
+      }
+      .secondary {
+        color: var(--secondary-text-color);
+      }
+      .small {
+        font-size: 13px;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 16px;
+      }
+      .list {
+        display: grid;
+      }
+      .scene {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px;
+        border-top: 1px solid var(--divider-color);
+        cursor: pointer;
+      }
+      .scene.selected {
+        background: var(--secondary-background-color, rgba(127, 127, 127, 0.08));
+        border-radius: 8px;
+      }
+      .scene.on .name {
+        color: var(--primary-color);
+        font-weight: 500;
+      }
+      .scene-text {
+        flex: 1;
+        min-width: 0;
+      }
+      .tag {
+        font-size: 12px;
+        color: var(--secondary-text-color);
+      }
+      ha-icon-button,
+      ha-button {
+        --ha-icon-button-size: 24px;
+        --mdc-icon-button-size: 24px;
+        --mdc-icon-size: 16px;
+      }
+      .speed ha-slider {
+        flex: 1;
+        min-width: 0;
+      }
+      .form {
+        display: grid;
+        gap: 10px;
+      }
+      .actions {
+        justify-content: flex-end;
+        gap: 8px;
+      }
+    `];
 	}
 };
-function Ae(e) {
-	return typeof e == "string" && /^#?[0-9a-f]{6}/i.test(e) ? `#${e.replace("#", "").slice(0, 6)}` : Array.isArray(e) && e.length >= 3 ? `#${e.slice(0, 3).map((e) => Math.max(0, Math.min(255, Math.round(Number(e)))).toString(16).padStart(2, "0")).join("")}` : "#000000";
-}
-function je(e) {
-	return Math.abs(e) >= 10 ? e.toFixed(0) : String(Number(e.toFixed(2)));
-}
-customElements.define("hue-scene-panel", ke);
+customElements.define("hue-scene-panel", Fe);
 //#endregion
 //#region src/panel.ts
-var Q = "ha_hue_entertainment", Me = `/config/integrations/integration/${Q}`, Ne = class extends q {
+var Q = "ha_hue_entertainment", Ie = `/config/integrations/integration/${Q}`, Le = class extends K {
 	constructor(...e) {
 		super(...e), this.narrow = !1, this.zones = [], this.scenes = [], this.busy = !1, this.colors = {
 			channels: {},
@@ -1565,29 +1664,29 @@ var Q = "ha_hue_entertainment", Me = `/config/integrations/integration/${Q}`, Ne
 		history.pushState(null, "", e), window.dispatchEvent(new CustomEvent("location-changed"));
 	}
 	render() {
-		return F`
+		return P`
       <div class="toolbar">
         <ha-menu-button .hass=${this.hass} .narrow=${this.narrow}></ha-menu-button>
         <div class="title">Hue Entertainment</div>
         ${this.renderStatePill()}
       </div>
       <div class="content">
-        ${this.status ? F`<div class="cards">
+        ${this.status ? P`<div class="cards">
                   ${this.renderBridge()} ${this.renderZone()} ${this.renderToggles()}
                 </div>
-                ${this.renderMessage()} ${this.renderPreview()} ${this.renderScenes()}` : this.message ? this.renderMessage() : F`<ha-card><div class="card-content">Loading…</div></ha-card>`}
+                ${this.renderMessage()} ${this.renderPreview()} ${this.renderScenes()}` : this.message ? this.renderMessage() : P`<ha-card><div class="card-content">Loading…</div></ha-card>`}
       </div>
     `;
 	}
 	renderStatePill() {
 		let e = this.status?.streaming;
-		if (!e) return R;
+		if (!e) return L;
 		let t = this.status?.live, n = e.state === "streaming" && t ? `Live · ${t.client}` : e.state === "streaming" ? `Streaming · ${Math.round(e.send_fps)}/s` : e.state === "reconnecting" ? "Reconnecting" : "Off";
-		return F`<span class="pill ${e.state}">${n}</span>`;
+		return P`<span class="pill ${e.state}">${n}</span>`;
 	}
 	renderBridge() {
 		let e = this.status.bridge;
-		return F`
+		return P`
       <ha-card
         ><div class="card-content">
           <div class="label">Bridge</div>
@@ -1597,9 +1696,9 @@ var Q = "ha_hue_entertainment", Me = `/config/integrations/integration/${Q}`, Ne
           </div>
           <a
             class="link"
-            href=${Me}
+            href=${Ie}
             @click=${(e) => {
-			e.preventDefault(), this.navigate(Me);
+			e.preventDefault(), this.navigate(Ie);
 		}}
             >Manage in Devices and services</a
           >
@@ -1609,7 +1708,7 @@ var Q = "ha_hue_entertainment", Me = `/config/integrations/integration/${Q}`, Ne
 	}
 	renderZone() {
 		let e = this.status.zone?.id ?? "";
-		return F`
+		return P`
       <ha-card
         ><div class="card-content">
           <label class="label" for="zone">Entertainment area</label>
@@ -1619,12 +1718,12 @@ var Q = "ha_hue_entertainment", Me = `/config/integrations/integration/${Q}`, Ne
             ?disabled=${this.busy || !this.zones.length}
             @change=${(e) => this.act("zone/select", { zone_id: e.target.value })}
           >
-            ${e ? R : F`<option value="" selected>Choose an area</option>`}
-            ${this.zones.map((t) => F`<option value=${t.id} ?selected=${t.id === e}>
+            ${e ? L : P`<option value="" selected>Choose an area</option>`}
+            ${this.zones.map((t) => P`<option value=${t.id} ?selected=${t.id === e}>
                   ${t.name} · ${t.channel_count} channels
                 </option>`)}
           </select>
-          ${this.zones.length ? R : F`<div class="secondary small">
+          ${this.zones.length ? L : P`<div class="secondary small">
                   No entertainment areas. Create one in the Hue app under Settings,
                   Entertainment areas.
                 </div>`}
@@ -1634,7 +1733,7 @@ var Q = "ha_hue_entertainment", Me = `/config/integrations/integration/${Q}`, Ne
 	}
 	renderToggles() {
 		let e = this.status, t = e.streaming.target_fps !== null;
-		return F`
+		return P`
       <ha-card
         ><div class="card-content toggles">
           ${this.toggle("Sync", t, !e.zone, (e) => this.act("sync", { on: e }))}
@@ -1644,7 +1743,7 @@ var Q = "ha_hue_entertainment", Me = `/config/integrations/integration/${Q}`, Ne
     `;
 	}
 	toggle(e, t, n, r, i) {
-		return F`
+		return P`
       <label class="toggle-row" title=${i ?? ""}>
         <span>${e}</span>
         <ha-switch
@@ -1657,7 +1756,7 @@ var Q = "ha_hue_entertainment", Me = `/config/integrations/integration/${Q}`, Ne
 	}
 	renderPreview() {
 		let e = this.status, t = e.streaming.target_fps !== null, n = this.brightnessDraft ?? Math.round(this.colors.brightness * 100);
-		return F`
+		return P`
       <ha-card
         ><div class="card-content">
           <div class="row">
@@ -1710,16 +1809,9 @@ var Q = "ha_hue_entertainment", Me = `/config/integrations/integration/${Q}`, Ne
 	}
 	renderScenes() {
 		let e = this.status;
-		return F`
+		return P`
       <hue-scene-panel
         .scenes=${this.scenes}
-        .getScene=${(e) => this.call("scene", { scene: e })}
-        .subscribePreview=${(e, t, n, r) => this.hass.connection.subscribeMessage((e) => r(e.colors), {
-			type: `${Q}/scene/preview`,
-			scene: e,
-			positions: t,
-			params: n
-		})}
         .playing=${e.scene.id}
         .playingParams=${e.scene.params}
         .speed=${e.scene.speed}
@@ -1758,13 +1850,23 @@ var Q = "ha_hue_entertainment", Me = `/config/integrations/integration/${Q}`, Ne
 				this.message = $(e);
 			}
 		}}
+        @edit-scene=${(e) => (this.shadowRoot?.querySelector("hue-scene-editor"))?.open(e.detail.scene, e.detail.params)}
       ></hue-scene-panel>
+      <hue-scene-editor
+        .getScene=${(e) => this.call("scene", { scene: e })}
+        .subscribePreview=${(e, t, n, r) => this.hass.connection.subscribeMessage((e) => r(e.colors), {
+			type: `${Q}/scene/preview`,
+			scene: e,
+			positions: t,
+			params: n
+		})}
+      ></hue-scene-editor>
     `;
 	}
 	renderMessage() {
 		let e = this.status?.live, t = this.message ?? this.status?.streaming.error;
-		return F`
-      ${e ? F`<div class="live-bar">
+		return P`
+      ${e ? P`<div class="live-bar">
               <span
                 >Live control by <b>${e.client}</b> since
                 ${(/* @__PURE__ */ new Date(e.since * 1e3)).toLocaleTimeString()}. Painting draws on
@@ -1778,8 +1880,8 @@ var Q = "ha_hue_entertainment", Me = `/config/integrations/integration/${Q}`, Ne
               >
                 Take over
               </ha-button>
-            </div>` : R}
-      ${t ? F`<div class="message" role="alert">${t}</div>` : R}
+            </div>` : L}
+      ${t ? P`<div class="message" role="alert">${t}</div>` : L}
     `;
 	}
 	static {
@@ -1920,5 +2022,5 @@ var Q = "ha_hue_entertainment", Me = `/config/integrations/integration/${Q}`, Ne
 function $(e) {
 	return e.message ?? String(e);
 }
-customElements.define("ha-hue-entertainment-panel", Ne);
+customElements.define("ha-hue-entertainment-panel", Le);
 //#endregion
