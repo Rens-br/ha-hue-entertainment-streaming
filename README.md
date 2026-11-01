@@ -19,14 +19,6 @@ Write your own as JSON files.
 - **Live control** for your own programs (visualisers, games, training apps) over Home Assistant's WebSocket.
 - **Plays nicely with a Hue Sync Box**: starting while another app syncs gives a clear "busy" message, and when another app takes over, sync turns off instead of fighting back. Optionally allow taking over.
 
-## Planned features
-The following features are currently planned to be added, but might change in the future:
-- **Custom light positioning:** Allowing to change the light positions from the panel, to be able to place them better, and enable more support for non-square rooms.
-- **Non-entertainment zone lights:** Allowing to add lights that are not in the entertainment zone, while they would be more restricted. (using normal light commands, which the bridge limits to about 10 updates a second)
-- **Additional scene features:** Brightness layers to control brightness from noise.
-- **Scene sharing:** A scene browser within home-assistant or another easier way to find and share scenes. 
-- **Multiple bridges:** Allowing to add multiple bridges, allowing for larger entertainment zones if possible.
-
 ## Requirements
 
 - A Philips Hue bridge with at least one **entertainment area**, created in the Hue app under Settings, Entertainment areas. The area also sets where each light is in the room.
@@ -65,6 +57,14 @@ Hue integration; both can be used side by side.
 - **Sync** and **Allow override** toggles.
 - **Room view**: the area like in the Hue app, with each light on a pole at its height and gradient lights as bars, coloured live. Pick a colour and select a light (or a part of a gradient light) to paint it; set the overall brightness.
 - **Scenes**: play and stop, speed, and a settings form for the selected scene.
+
+### Scene editor
+The scene editor, accessed by clicking the preview button after selecting a scene will show the JSON code, and a preview of what the scene will be like.
+This preview is rendered in the UI on a fake room with lights covering the walls and floor, showing how the scene looks in different places.
+
+![scene-editor](./docs/images/scene_editor.png)
+
+Using the controls will update the preview to see how the scene looks with different properties. And editing the JSON will validate the scene, and update the live preview if the scene is valid.
 
 ## Entities
 
@@ -238,6 +238,14 @@ actions:
 - **One stream per bridge.** While a Hue Sync Box, the Hue Sync app or another app streams, this integration can't (unless **Allow override** is on), and the other way round.
 - **Gradient lights** get as many controllable parts as the bridge gives them channels in the entertainment area, which can be fewer than the light's segments.
 - **Positions** come from the entertainment area in the Hue app; scenes and the room view are only as accurate as that setup.
+
+## Planned features
+The following features are currently planned to be added, but might change in the future:
+- **Custom light positioning:** Allowing to change the light positions from the panel, to be able to place them better, and enable more support for non-square rooms.
+- **Non-entertainment zone lights:** Allowing to add lights that are not in the entertainment zone, while they would be more restricted. (using normal light commands, which the bridge limits to about 10 updates a second)
+- **Additional scene features:** Brightness layers to control brightness from noise.
+- **Scene sharing:** A scene browser within home-assistant or another easier way to find and share scenes. 
+- **Multiple bridges:** Allowing to add multiple bridges, allowing for larger entertainment zones if possible.
 
 ## Troubleshooting
 

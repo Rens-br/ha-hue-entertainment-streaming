@@ -1,6 +1,9 @@
 {
   "domain": "ha_hue_entertainment",
   "name": "Philips Hue Entertainment Streaming",
+  "categories": [
+    "lighting.lighting_systems"
+  ],
   "codeowners": [
     "@Rens-br"
   ],
@@ -10,9 +13,6 @@
     "panel_custom",
     "websocket_api",
     "zeroconf"
-  ],
-  "categories": [
-    "lighting.lighting_systems"
   ],
   "documentation": "https://github.com/Rens-br/ha-hue-entertainment-streaming",
   "integration_type": "hub",
