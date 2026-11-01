@@ -1,6 +1,6 @@
 # Philips Hue Entertainment Streaming for Home Assistant
 
-[![HACS Custom](https://img.shields.io/badge/HACS-Custom-41BDF5.svg)](https://hacs.xyz/docs/faq/custom_repositories/)
+[![HACS Default](https://img.shields.io/badge/HACS-Default-41BDF5.svg)](https://hacs.xyz)
 [![Validate](https://github.com/Rens-br/ha-hue-entertainment-streaming/actions/workflows/validate.yml/badge.svg)](https://github.com/Rens-br/ha-hue-entertainment-streaming/actions/workflows/validate.yml)
 [![License](https://img.shields.io/github/license/Rens-br/ha-hue-entertainment-streaming)](LICENSE)
 
@@ -41,10 +41,8 @@ The following features are currently planned to be added, but might change in th
 
 Or by hand:
 
-1. In HACS, open the menu (⋮), **Custom repositories**, add
-   `https://github.com/Rens-br/ha-hue-entertainment-streaming` with type **Integration**.
-2. Search for **Philips Hue Entertainment Streaming** and download it.
-3. Restart Home Assistant.
+1. In HACS, search for **Philips Hue Entertainment Streaming** and download it.
+2. Restart Home Assistant.
 
 ### Manual
 

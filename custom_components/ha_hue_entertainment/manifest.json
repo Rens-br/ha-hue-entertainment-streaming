@@ -11,6 +11,9 @@
     "websocket_api",
     "zeroconf"
   ],
+  "categories": [
+    "lighting.lighting_systems"
+  ],
   "documentation": "https://github.com/Rens-br/ha-hue-entertainment-streaming",
   "integration_type": "hub",
   "iot_class": "local_polling",
