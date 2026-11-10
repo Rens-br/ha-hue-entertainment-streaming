@@ -59,6 +59,10 @@ class Frame:
             self._values[node] = node.evaluate(self)
         return self._values[node]
 
+    def number(self, node: Node) -> float:
+        """The value of a field that is the same for every light, such as a rate."""
+        return self.value(node)[0]
+
 
 class Node:
     """One block of a scene.
@@ -123,8 +127,15 @@ class Compiler:
     'layer 2 > color > field > noise: unknown option "scal" (did you mean "scale"?)'
     """
 
-    def __init__(self, parameters: dict, named: dict, node_types: dict[str, NodeType]):
+    def __init__(
+        self,
+        parameters: dict,
+        inputs: dict,
+        named: dict,
+        node_types: dict[str, NodeType],
+    ):
         self.parameters = parameters
+        self.inputs = inputs
         self._types = node_types
         self.nodes: list[Node] = []  # every node, each after the nodes it uses
         self._path: list[str] = []
@@ -148,11 +159,18 @@ class Compiler:
 
     # ---- options, read by the node types --------------------------------
 
+    def option(self, spec: dict, key: str, default=None):
+        """The value of an option as written; without a default it is required."""
+        self._known[-1].add(key)
+        if key not in spec and default is None:
+            self.fail(f'"{key}" is required')
+        return spec.get(key, default)
+
     def field(self, spec: dict, key: str, default: float | None = None) -> Node:
-        return self._value(self._get(spec, key, default), FIELD, key)
+        return self._value(self.option(spec, key, default), FIELD, key)
 
     def color(self, spec: dict, key: str, default: str | None = None) -> Node:
-        return self._value(self._get(spec, key, default), COLOR, key)
+        return self._value(self.option(spec, key, default), COLOR, key)
 
     def fields(self, spec: dict, key: str, count: int | None = None) -> list[Node]:
         """A list of fields, such as "inputs" or a range like "from": [0, 1]."""
@@ -164,7 +182,7 @@ class Compiler:
     def word(
         self, spec: dict, key: str, default: str, choices: tuple[str, ...]
     ) -> Word:
-        value = self._get(spec, key, default)
+        value = self.option(spec, key, default)
         if isinstance(value, str) and value.startswith("$"):
             p = self._parameter(value[1:])
             if p["type"] != "choice" or any(o not in choices for o in p["options"]):
@@ -176,14 +194,14 @@ class Compiler:
             self.fail(f'"{key}" must be one of {", ".join(choices)}')
         return Word(value)
 
-    def _get(self, spec: dict, key: str, default):
-        self._known[-1].add(key)
-        if key not in spec and default is None:
-            self.fail(f'"{key}" is required')
-        return spec.get(key, default)
+    def flag(self, spec: dict, key: str, default: bool) -> bool:
+        value = self.option(spec, key, default)
+        if not isinstance(value, bool):
+            self.fail(f'"{key}" must be true or false')
+        return value
 
     def _list(self, spec: dict, key: str, kind: str, count: int | None) -> list[Node]:
-        values = self._get(spec, key, None)
+        values = self.option(spec, key)
         if not isinstance(values, list) or not values:
             self.fail(f'"{key}" must be a list')
         if count is not None and len(values) != count:
@@ -216,7 +234,7 @@ class Compiler:
         if not isinstance(type_name, str) or type_name not in self._types:
             self.fail(
                 f'unknown node type "{type_name}"'
-                + _did_you_mean(type_name, self._types)
+                + did_you_mean(type_name, self._types)
             )
         with self._at(label or type_name):
             self._known.append({"type"})
@@ -224,7 +242,7 @@ class Compiler:
             known = self._known.pop()
             for key in spec:
                 if key not in known:
-                    self.fail(f'unknown option "{key}"' + _did_you_mean(key, known))
+                    self.fail(f'unknown option "{key}"' + did_you_mean(key, known))
         return self._add(node)
 
     def _ref(self, spec: dict) -> Node:
@@ -244,7 +262,7 @@ class Compiler:
         if name in self._named:
             return self._named[name]
         if name not in self._specs:
-            self.fail(f'unknown node "{name}"' + _did_you_mean(name, self._specs))
+            self.fail(f'unknown node "{name}"' + did_you_mean(name, self._specs))
         if name in self._building:
             loop = [*self._building[self._building.index(name) :], name]
             self.fail(f'node "{name}" refers to itself ({" > ".join(loop)})')
@@ -277,7 +295,7 @@ class Compiler:
     def _parameter(self, name: str) -> dict:
         if name not in self.parameters:
             self.fail(
-                f'unknown parameter "${name}"' + _did_you_mean(name, self.parameters)
+                f'unknown parameter "${name}"' + did_you_mean(name, self.parameters)
             )
         return self.parameters[name]
 
@@ -294,7 +312,14 @@ class Compiler:
             self._path.pop()
 
 
-def _did_you_mean(word, options) -> str:
+def accumulate(total: list[float], rate: Node, frame: Frame) -> list[float]:
+    """total + rate × dt for every light, starting from zero. Adding up instead of
+    multiplying by the time means a change of rate never makes the result jump."""
+    total = total or [0.0] * frame.count
+    return [t + r * frame.dt for t, r in zip(total, frame.value(rate), strict=True)]
+
+
+def did_you_mean(word, options) -> str:
     match = difflib.get_close_matches(str(word), [str(o) for o in options], n=1)
     return f' (did you mean "{match[0]}"?)' if match else ""
 

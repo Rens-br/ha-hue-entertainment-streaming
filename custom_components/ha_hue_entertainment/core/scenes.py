@@ -46,6 +46,7 @@ class Scene:
     name: str
     raw: dict
     parameters: dict[str, dict] = field(default_factory=dict)
+    inputs: dict[str, dict] = field(default_factory=dict)
     duration: float | None = None
     description: str = ""
     author: str = ""
@@ -80,6 +81,12 @@ def load_scene(data: dict, source: str = "scene", builtin: bool = False) -> Scen
     for pname, p in params.items():
         _check_parameter(pname, p, fail)
 
+    inputs = data.get("inputs", {})
+    if not isinstance(inputs, dict):
+        fail('"inputs" must be an object')
+    for iname, i in inputs.items():
+        _check_input(iname, i, fail)
+
     duration = data.get("duration")
     if duration is not None and (
         not isinstance(duration, (int, float)) or duration <= 0
@@ -99,11 +106,22 @@ def load_scene(data: dict, source: str = "scene", builtin: bool = False) -> Scen
         name=name.strip(),
         raw=data,
         parameters=params,
+        inputs=inputs,
         duration=duration,
         description=data.get("description", ""),
         author=data.get("author", ""),
         builtin=builtin,
     )
+
+
+def _check_input(name: str, i, fail):
+    numbers = isinstance(i, dict) and all(
+        isinstance(i[key], (int, float)) and not isinstance(i[key], bool)
+        for key in ("default", "min", "max")
+        if key in i or key == "default"
+    )
+    if not numbers:
+        fail(f'input "{name}" needs a number as "default" (and as "min" and "max")')
 
 
 def _check_parameter(name: str, p, fail):
@@ -170,7 +188,12 @@ class Layer:
 
 def _compile(data: dict) -> tuple[list[Node], list[Layer]]:
     """Every node of the scene, each after the nodes it uses, and its layers."""
-    c = Compiler(data.get("parameters", {}), data.get("nodes", {}), NODE_TYPES)
+    c = Compiler(
+        data.get("parameters", {}),
+        data.get("inputs", {}),
+        data.get("nodes", {}),
+        NODE_TYPES,
+    )
     layers = [Layer(spec, c, f"layer {i + 1}") for i, spec in enumerate(data["layers"])]
     return c.nodes, layers
 
@@ -208,6 +231,7 @@ class SceneRun:
                 raise SceneError(f'{scene.id}: unknown parameter "{name}"')
             values[name] = value
         self.scene, self.params = scene, values
+        self.inputs = {name: i["default"] for name, i in scene.inputs.items()}
         self.nodes, self.layers = _compile(scene.raw)
         self.channels = list(positions)
         self.positions = list(positions.values())
@@ -216,11 +240,24 @@ class SceneRun:
         for node in self.nodes:
             node.reset(rng)
 
+    def set_inputs(self, values: dict) -> None:
+        """Set live inputs, kept within their min and max."""
+        inputs = dict(self.inputs)
+        for name, value in values.items():
+            if name not in self.scene.inputs:
+                raise SceneError(f'{self.scene.id}: unknown input "{name}"')
+            spec = self.scene.inputs[name]
+            value = max(spec.get("min", value), min(spec.get("max", value), value))
+            inputs[name] = float(value)
+        self.inputs = inputs  # swap the reference; the stream thread reads it lock-free
+
     def render(self, dt: float, speed: float = 1.0) -> dict[int, Color] | None:
         self.time += dt * speed
         if self.scene.duration is not None and self.time > self.scene.duration:
             return None
-        frame = Frame(self.positions, dt * speed, self.params, {})
+        if not self.positions:
+            return {}
+        frame = Frame(self.positions, dt * speed, self.params, self.inputs)
         for node in self.nodes:
             node.update(frame)
         colors: list[Color] = [(0.0, 0.0, 0.0)] * frame.count

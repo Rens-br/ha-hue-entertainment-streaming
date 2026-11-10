@@ -6,7 +6,7 @@ in its layers. Every node is computed once per frame, however often it is used.
 The format and the node types are described in docs/NODES.md.
 """
 
-from . import colors
+from . import colors, sources
 from .base import (
     COLOR,
     FIELD,
@@ -33,7 +33,8 @@ __all__ = [
     "parse_color",
 ]
 
-# TODO: sources, generators and operators, each in its own file 
+# TODO: generators and operators, each in its own file
 NODE_TYPES: dict[str, NodeType] = {
+    **sources.TYPES,
     **colors.TYPES,
 }
