@@ -59,6 +59,10 @@ class Frame:
             self._values[node] = node.evaluate(self)
         return self._values[node]
 
+    def rows(self, *nodes: Node) -> Iterator[tuple]:
+        """The values of several nodes side by side: one tuple per light."""
+        return zip(*(self.value(node) for node in nodes), strict=True)
+
     def number(self, node: Node) -> float:
         """The value of a field that is the same for every light, such as a rate."""
         return self.value(node)[0]
@@ -172,12 +176,18 @@ class Compiler:
     def color(self, spec: dict, key: str, default: str | None = None) -> Node:
         return self._value(self.option(spec, key, default), COLOR, key)
 
-    def fields(self, spec: dict, key: str, count: int | None = None) -> list[Node]:
+    def fields(
+        self,
+        spec: dict,
+        key: str,
+        count: int | None = None,
+        default: list[float] | None = None,
+    ) -> list[Node]:
         """A list of fields, such as "inputs" or a range like "from": [0, 1]."""
-        return self._list(spec, key, FIELD, count)
+        return self._list(spec, key, FIELD, count, default)
 
     def colors(self, spec: dict, key: str) -> list[Node]:
-        return self._list(spec, key, COLOR, None)
+        return self._list(spec, key, COLOR, None, None)
 
     def word(
         self, spec: dict, key: str, default: str, choices: tuple[str, ...]
@@ -200,8 +210,10 @@ class Compiler:
             self.fail(f'"{key}" must be true or false')
         return value
 
-    def _list(self, spec: dict, key: str, kind: str, count: int | None) -> list[Node]:
-        values = self.option(spec, key)
+    def _list(
+        self, spec: dict, key: str, kind: str, count: int | None, default
+    ) -> list[Node]:
+        values = self.option(spec, key, default)
         if not isinstance(values, list) or not values:
             self.fail(f'"{key}" must be a list')
         if count is not None and len(values) != count:
@@ -310,6 +322,10 @@ class Compiler:
             yield
         finally:
             self._path.pop()
+
+
+def clamp(x: float) -> float:
+    return max(0.0, min(1.0, x))
 
 
 def accumulate(total: list[float], rate: Node, frame: Frame) -> list[float]:
