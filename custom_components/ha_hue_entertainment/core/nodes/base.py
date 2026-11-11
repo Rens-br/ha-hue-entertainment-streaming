@@ -163,10 +163,10 @@ class Compiler:
 
     # ---- options, read by the node types --------------------------------
 
-    def option(self, spec: dict, key: str, default=None):
+    def option(self, spec: dict, key: str, default=None, required: bool = True):
         """The value of an option as written; without a default it is required."""
         self._known[-1].add(key)
-        if key not in spec and default is None:
+        if key not in spec and default is None and required:
             self.fail(f'"{key}" is required')
         return spec.get(key, default)
 
