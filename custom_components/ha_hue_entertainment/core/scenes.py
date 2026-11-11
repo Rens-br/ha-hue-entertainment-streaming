@@ -27,6 +27,7 @@ from .nodes import (
     Node,
     Position,
     SceneError,
+    clamp,
     parse_color,
 )
 
@@ -199,18 +200,18 @@ def _compile(data: dict) -> tuple[list[Node], list[Layer]]:
 
 
 def _blend(base: Color, color: Color, opacity: float, mode: str) -> Color:
-    s = max(0.0, min(1.0, opacity))
+    s = clamp(opacity)
 
     def channel(below: float, c: float) -> float:
         if mode == "add":
-            return min(1.0, below + c * s)
+            return below + c * s
         if mode == "max":
             return max(below, c * s)
         if mode == "multiply":
             return below * (1 - s + s * c)
         return below + (c - below) * s
 
-    r, g, b = (channel(x, c) for x, c in zip(base, color, strict=True))
+    r, g, b = (clamp(channel(x, c)) for x, c in zip(base, color, strict=True))
     return r, g, b
 
 

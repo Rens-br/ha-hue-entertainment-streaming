@@ -17,6 +17,7 @@ from .base import (
     NodeType,
     Position,
     SceneError,
+    clamp,
     parse_color,
 )
 
@@ -30,6 +31,7 @@ __all__ = [
     "Node",
     "Position",
     "SceneError",
+    "clamp",
     "parse_color",
 ]
 
