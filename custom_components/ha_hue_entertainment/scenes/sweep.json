@@ -1,5 +1,5 @@
 {
-  "format": 1,
+  "format": 2,
   "id": "sweep",
   "name": "Sweep",
   "description": "A band of colour travels across the room.",
@@ -12,8 +12,19 @@
     "axis": {"type": "choice", "default": "x", "options": ["x", "y", "z"]},
     "bounce": {"type": "choice", "default": false, "options": [false, true]}
   },
+  "nodes": {
+    "across": {"type": "oscillator", "shape": "saw",
+      "rate": {"type": "divide", "a": 1, "b": "$period"}},
+    "there_and_back": {"type": "oscillator", "shape": "triangle",
+      "rate": {"type": "divide", "a": 0.5, "b": "$period"}},
+    "centre": {"type": "remap", "to": [-1.2, 1.2],
+      "input": {"type": "mix", "a": {"ref": "across"}, "b": {"ref": "there_and_back"}, "t": "$bounce"}},
+    "distance": {"type": "abs",
+      "input": {"type": "subtract", "a": {"type": "position", "axis": "$axis"}, "b": {"ref": "centre"}}}
+  },
   "layers": [
-    {"type": "solid", "color": "$background"},
-    {"type": "band", "axis": "$axis", "color": "$color", "width": "$width", "period": "$period", "bounce": "$bounce"}
+    {"color": "$background"},
+    {"color": "$color",
+     "opacity": {"type": "smoothstep", "edge0": "$width", "edge1": 0, "input": {"ref": "distance"}}}
   ]
 }

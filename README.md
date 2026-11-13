@@ -149,7 +149,7 @@ Entertainment light off to stop sync.
 
 ## Scenes (animations)
 
-> **Further development**: the scenes feature is very basic allowing for some animated scenes already, but is one of the areas I want to focus on most when the base is solid, allowing for even more advanced effects.
+> **Further development**: scenes are built from small nodes that can be combined freely, and this is one of the areas I want to focus on most. More node types and live inputs for scenes are planned.
 
 There is a couple of built in scenes that are shipped with the integration, these are meant as demo scenes and can change later on: **Sweep** (a band of colour travelling across the room), **Aurora**
 (slow green, teal and violet curtains) and **Thunderstorm** (dark clouds with
@@ -163,12 +163,13 @@ files are skipped with the reason in the log.
 
 New scenes can be uploaded from the panel, and user uploaded scenes can be deleted from here as well.
 
-A scene has settings (`parameters`) and `layers` that compute each light's
-colour from its position in the room and the time:
+A scene is a small graph of **nodes** that ends in **layers**. Every node gives
+one value per light, many times a second, from where the light is in the room and
+the time. This is the Music flow scene:
 
 ```json
 {
-  "format": 1,
+  "format": 2,
   "id": "music-flow",
   "name": "Music flow",
   "parameters": {
@@ -177,16 +178,81 @@ colour from its position in the room and the time:
     "flow": {"type": "number", "default": 0.08, "min": 0.01, "max": 0.5}
   },
   "layers": [
-    {"type": "noise", "colors": ["$color_1", "$color_2"], "scale": 1.2, "drift": "$flow"}
+    {"color": {"type": "map", "wrap": true,
+       "colors": ["$color_1", "$color_2"],
+       "field": {"type": "noise", "scale": 1.2, "offset": {"type": "time", "speed": "$flow"}}}}
   ]
 }
 ```
 
-Layer types: `solid`, `gradient`, `band`, `noise` and `flash`, combined with
-`normal`, `add` or `max` blending. The full format is described at the top of
-[`core/scenes.py`](custom_components/ha_hue_entertainment/core/scenes.py), and
-the [built-in scenes](custom_components/ha_hue_entertainment/scenes) are
-examples to start from.
+Read it from the inside out: `time` counts seconds (scaled by `flow`), `noise` turns
+that into a smooth moving pattern between 0 and 1 across the room, and `map` turns
+each light's number into a colour from the palette. `parameters` are the settings
+shown in the panel, and `"$flow"` uses one.
+
+**How a scene is put together**
+
+- A node gives a **field** (a number per light) or a **colour**. Where a field is
+  expected you can write a number, `"$setting"` or a node; where a colour is expected,
+  `"#rrggbb"`, `[r, g, b]`, `"$setting"` or a node.
+- To use a node in several places, put it under `nodes` and write `{"ref": "name"}`. A
+  node with more than one output is used like `{"ref": "burst", "output": "tint"}`.
+- Positions are the ones from the Hue app, from -1 to 1: `x` left to right, `z` floor to
+  ceiling, `y` the other horizontal axis.
+- `layers` are drawn from the bottom up. A layer has a `color`, a `blend` (`normal`, `add`,
+  `max` or `multiply`) and an `opacity`: a number, a setting, or a field to show the layer
+  only in some places.
+- A scene has `format` (2), `id`, `name`, optionally `description`, `author`, `parameters`
+  (`color`, `number` or `choice`), `inputs`, `nodes` and `duration`. With a `duration` the
+  scene plays once, otherwise it loops.
+
+**Nodes**
+
+| Node | Gives | Options |
+|---|---|---|
+| `time` | seconds since the scene started | `speed`, `offset` |
+| `position` | where the light is | `axis`: `x`, `y`, `z` (-1 to 1), `angle`, `radius` (0 to 1) |
+| `input` | a value set from outside, the same for every light | `name`, `smooth` |
+| `noise` | a smooth, slowly changing pattern, 0 to 1 | `scale`, `offset` (moves it) |
+| `wave` | a wave, 0 to 1, over a field such as a position | `input`, `cycles`, `phase`, `shape`: `sine`, `triangle`, `saw` |
+| `oscillator` | a wave, 0 to 1, over time | `rate` (per second), `phase`, `shape` |
+| `distance` | 1 at a point, falling to 0 at `radius` away | `from` [x, y, z], `radius` |
+| `strikes` | random bursts that roll across the room, for lightning or fireworks | `rate`, `spread`, `decay`, `flicker`, `origin`, `seed`; outputs `value` and `tint` (a random number per burst) |
+| `add`, `multiply`, `min`, `max` | combined fields | `inputs` (a list) |
+| `subtract`, `divide` | `a - b`, `a / b` | `a`, `b` |
+| `mix` | between `a` and `b` | `a`, `b`, `t` |
+| `invert`, `abs`, `clamp` | `1 - x`, the size of `x`, `x` kept within 0 to 1 | `input` |
+| `remap` | a field moved from one range to another | `input`, `from`, `to`, `clamp` |
+| `smoothstep` | a smooth step from 0 to 1 | `input`, `edge0`, `edge1` |
+| `color` | one colour for every light | `value` |
+| `map` | a colour from a field, through a palette | `field`, `colors`, `wrap`, `softness` |
+| `brightness` | a colour made darker by a field | `color`, `field` |
+
+`oscillator` and `time` keep their own position, so changing `rate` or `speed` speeds a
+scene up or slows it down without a jump. Number options take a number, a setting or a
+node, so one pattern can drive another.
+
+Mistakes are reported with where they are, for example
+`layer 2 > opacity > noise: unknown option "scal" (did you mean "scale"?)`, in the
+editor, on upload and in the log.
+
+**Inputs** are values that come from outside while a scene plays, such as a power zone or
+a cadence. A scene declares them (`"inputs": {"zone": {"default": 0, "min": 0, "max": 7}}`)
+and reads them with the `input` node. Setting them from Home Assistant or an external
+client is not available yet.
+
+**Scenes in the old format** (`"format": 1`, with layers such as `solid`, `gradient`,
+`band`, `noise` and `flash`) are no longer supported: they are skipped, with the
+reason in the log. They convert like this, and the
+[built-in scenes](custom_components/ha_hue_entertainment/scenes) show each one:
+
+| Format 1 layer | Format 2 |
+|---|---|
+| `solid` | a layer with that `color` |
+| `gradient` | `map` of a `position` (use `wrap` for a loop); `shift` becomes a `time` in the field |
+| `band` | a layer whose `opacity` is a `smoothstep` of the distance from a moving centre (see Sweep) |
+| `noise` | `map` of a `noise`, with `drift` as the `speed` of a `time` in its `offset` (see Aurora) |
+| `flash` | a layer with `"blend": "add"` whose `opacity` is a `strikes` (see Thunderstorm) |
 
 ## External clients
 
@@ -243,7 +309,7 @@ actions:
 The following features are currently planned to be added, but might change in the future:
 - **Custom light positioning:** Allowing to change the light positions from the panel, to be able to place them better, and enable more support for non-square rooms.
 - **Non-entertainment zone lights:** Allowing to add lights that are not in the entertainment zone, while they would be more restricted. (using normal light commands, which the bridge limits to about 10 updates a second)
-- **Additional scene features:** Brightness layers to control brightness from noise.
+- **Live inputs for scenes:** Setting values such as a power zone or a cadence on a running scene from Home Assistant or an external client. The scene format already has them.
 - **Scene sharing:** A scene browser within home-assistant or another easier way to find and share scenes. 
 - **Multiple bridges:** Allowing to add multiple bridges, allowing for larger entertainment zones if possible.
 
@@ -265,7 +331,7 @@ Report problems on the [issue tracker](https://github.com/Rens-br/ha-hue-enterta
 
 ## Development
 
-- `custom_components/ha_hue_entertainment/core/`: bridge (discovery, pairing, CLIP v2), stream (HueStream v2 over DTLS with pyOpenSSL), engine, scenes. No Home Assistant imports, so the [standalone server](docs/STANDALONE.md) uses the same code.
+- `custom_components/ha_hue_entertainment/core/`: bridge (discovery, pairing, CLIP v2), stream (HueStream v2 over DTLS with pyOpenSSL), engine, scenes and their nodes. No Home Assistant imports, so the [standalone server](docs/STANDALONE.md) uses the same code.
 - The panel is TypeScript + Lit in `frontend/`, built into `custom_components/ha_hue_entertainment/frontend/panel.js` (committed, so installing needs no build step):
 
   ```bash
@@ -276,6 +342,12 @@ Report problems on the [issue tracker](https://github.com/Rens-br/ha-hue-enterta
 
 - Python is checked with `ruff check` and `ruff format` (config in `pyproject.toml`). CI runs these, hassfest and the HACS validator.
 
+## AI-assisted development
+
+This integration was built with the help of Claude Code, The design and decisions are mine, most of the code is written with AI and reviewed and tested by me on a real Hue system.
+
 ## License
 
 MIT, see [LICENSE](LICENSE).
+
+This project is in no way affiliated with Philips Hue or Signify.
